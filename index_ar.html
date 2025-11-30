@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تدوير تك - بناء مستقبل أكثر خضرة</title>
+    <link rel="icon" href="images/tadweer_image.jpeg" type="image/jpeg">
+    <meta name="description" content="تدوير تك - تعزيز مستقبل مستدام من خلال إعادة التدوير وتقليل النفايات في سوريا.">
+    <meta property="og:title" content="تدوير تك - بناء مستقبل أكثر خضرة">
+    <meta property="og:image" content="https://majdkassawat.github.io/RecycleWebsite/images/tadweer_image.jpeg">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -33,19 +38,19 @@
 
     <section id="home" class="hero">
         <div class="hero-container">
-            <div class="hero-content">
+            <div class="hero-content" data-aos="fade-left">
                 <h1>نمنح نفاياتك قيمة</h1>
                 <p>نسعى لبيئة خالية من النفايات. مخلفات اليوم هي طاقة الغد.</p>
                 <a href="#about" class="cta-button">اعرف المزيد</a>
             </div>
-            <div class="hero-image">
+            <div class="hero-image" data-aos="fade-right">
                 <img src="images/tadweer_image.jpeg" alt="شعار تدوير تك">
             </div>
         </div>
     </section>
 
     <section id="about" class="content-section">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>من نحن</h2>
             <p class="lead-text">نحن مبادرة تهدف إلى إيجاد حلول لمشكلة النفايات وتقليل ضررها على البيئة السورية.</p>
             
@@ -63,14 +68,14 @@
     </section>
 
     <section id="mission" class="content-section alt-bg">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>رسالتنا ورؤيتنا</h2>
             <div class="cards">
-                <div class="card">
+                <div class="card" data-aos="flip-right">
                     <h3>رسالتنا</h3>
                     <p>تعزيز مستقبل مستدام من خلال تطوير قابلية إعادة التدوير وتقليل النفايات عبر التعليم والابتكار والمشاركة المجتمعية. نتعاون مع الأفراد والشركات والحكومات لتبني ممارسات صديقة للبيئة، وتقليل نفايات المكبات، وخلق اقتصاد دائري حيث يتم إعادة استخدام الموارد وإعادة تدويرها بكفاءة. علاوة على ذلك، ندعم مشاركة الشباب من خلال البحث عن فرص خضراء لهم تعزز الجودة البيئية.</p>
                 </div>
-                <div class="card">
+                <div class="card" data-aos="flip-left">
                     <h3>رؤيتنا</h3>
                     <p>عالم يتم فيه تقليل النفايات إلى الحد الأدنى، وتكون كل مادة قابلة لإعادة التدوير، وتزدهر المجتمعات في انسجام مع الطبيعة. نتصور حركة عالمية حيث يصبح الاستهلاك المسؤول وإعادة التدوير أسلوب حياة، مما يضمن كوكبًا أنظف وأكثر خضرة للأجيال القادمة.</p>
                 </div>
@@ -79,10 +84,10 @@
     </section>
 
     <section id="conduct" class="content-section">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>مدونة السلوك</h2>
             <div class="grid">
-                <div class="service-item">
+                <div class="service-item" data-aos="zoom-in">
                     <h3>1. الالتزام بالاستدامة</h3>
                     <p>نمنح الأولوية للمسؤولية البيئية في جميع الأنشطة، ونعزز تقليل النفايات وإعادة التدوير ومبادئ الاقتصاد الدائري.</p>
                 </div>
@@ -119,7 +124,7 @@
     </section>
 
     <section id="contact" class="content-section alt-bg">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>تواصل معنا</h2>
             <div class="contact-container">
                 <div class="contact-info">
@@ -163,6 +168,8 @@
         </div>
     </footer>
 
+    <button id="backToTop" title="العودة للأعلى"><i class="fas fa-arrow-up"></i></button>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

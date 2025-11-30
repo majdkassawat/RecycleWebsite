@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tadweer Tech - Building a Greener Future</title>
+    <link rel="icon" href="images/tadweer_image.jpeg" type="image/jpeg">
+    <meta name="description" content="Tadweer Tech - Promoting a sustainable future through recycling and waste reduction in Syria.">
+    <meta property="og:title" content="Tadweer Tech - Building a Greener Future">
+    <meta property="og:image" content="https://majdkassawat.github.io/RecycleWebsite/images/tadweer_image.jpeg">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -33,19 +38,19 @@
 
     <section id="home" class="hero">
         <div class="hero-container">
-            <div class="hero-content">
+            <div class="hero-content" data-aos="fade-right">
                 <h1>We Give the Value of Your Waste</h1>
                 <p>Seeking a waste-free environment. Today's residues, tomorrow’s energy.</p>
                 <a href="#about" class="cta-button">Learn More</a>
             </div>
-            <div class="hero-image">
+            <div class="hero-image" data-aos="fade-left">
                 <img src="images/tadweer_image.jpeg" alt="Tadweer Tech Logo">
             </div>
         </div>
     </section>
 
     <section id="about" class="content-section">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>About Us</h2>
             <p class="lead-text">We are an initiative aiming to find solutions to the waste problem and minimize its harm to the Syrian environment.</p>
             
@@ -63,14 +68,14 @@
     </section>
 
     <section id="mission" class="content-section alt-bg">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Our Mission & Vision</h2>
             <div class="cards">
-                <div class="card">
+                <div class="card" data-aos="flip-left">
                     <h3>Our Mission</h3>
                     <p>To promote a sustainable future by advancing recyclability and waste reduction through education, innovation, and community engagement. We collaborate with individuals, businesses, and governments to adopt eco-friendly practices, reduce landfill waste, and create a circular economy where resources are reused, repurposed, and recycled efficiently. Furthermore, we support youth engagement by seeking green opportunities for them that enhance environmental quality.</p>
                 </div>
-                <div class="card">
+                <div class="card" data-aos="flip-right">
                     <h3>Our Vision</h3>
                     <p>A world where waste is minimized, every material is recyclable, and communities thrive in harmony with nature. We envision a global movement where responsible consumption and recycling become a way of life, ensuring a cleaner, greener planet for future generations.</p>
                 </div>
@@ -79,10 +84,10 @@
     </section>
 
     <section id="conduct" class="content-section">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Code of Conduct</h2>
             <div class="grid">
-                <div class="service-item">
+                <div class="service-item" data-aos="zoom-in">
                     <h3>1. Commitment to Sustainability</h3>
                     <p>We prioritize environmental responsibility in all activities, promoting waste reduction, recycling, and circular economy principles.</p>
                 </div>
@@ -119,7 +124,7 @@
     </section>
 
     <section id="contact" class="content-section alt-bg">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Contact Us</h2>
             <div class="contact-container">
                 <div class="contact-info">
@@ -163,6 +168,8 @@
         </div>
     </footer>
 
+    <button id="backToTop" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tadweer Tech - Construyendo un Futuro Más Verde</title>
+    <link rel="icon" href="images/tadweer_image.jpeg" type="image/jpeg">
+    <meta name="description" content="Tadweer Tech - Promoviendo un futuro sostenible a través del reciclaje y la reducción de residuos en Siria.">
+    <meta property="og:title" content="Tadweer Tech - Construyendo un Futuro Más Verde">
+    <meta property="og:image" content="https://majdkassawat.github.io/RecycleWebsite/images/tadweer_image.jpeg">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -33,19 +38,19 @@
 
     <section id="home" class="hero">
         <div class="hero-container">
-            <div class="hero-content">
+            <div class="hero-content" data-aos="fade-right">
                 <h1>Damos Valor a Tus Residuos</h1>
                 <p>Buscando un medio ambiente libre de residuos. Los residuos de hoy, la energía del mañana.</p>
                 <a href="#about" class="cta-button">Saber Más</a>
             </div>
-            <div class="hero-image">
+            <div class="hero-image" data-aos="fade-left">
                 <img src="images/tadweer_image.jpeg" alt="Logo de Tadweer Tech">
             </div>
         </div>
     </section>
 
     <section id="about" class="content-section">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Sobre Nosotros</h2>
             <p class="lead-text">Somos una iniciativa que busca encontrar soluciones al problema de los residuos y minimizar su daño al medio ambiente sirio.</p>
             
@@ -63,14 +68,14 @@
     </section>
 
     <section id="mission" class="content-section alt-bg">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Nuestra Misión y Visión</h2>
             <div class="cards">
-                <div class="card">
+                <div class="card" data-aos="flip-left">
                     <h3>Nuestra Misión</h3>
                     <p>Promover un futuro sostenible avanzando en la reciclabilidad y la reducción de residuos a través de la educación, la innovación y la participación comunitaria. Colaboramos con individuos, empresas y gobiernos para adoptar prácticas ecológicas, reducir los residuos en vertederos y crear una economía circular donde los recursos se reutilicen, reutilicen y reciclen de manera eficiente. Además, apoyamos la participación juvenil buscando oportunidades verdes para ellos que mejoren la calidad ambiental.</p>
                 </div>
-                <div class="card">
+                <div class="card" data-aos="flip-right">
                     <h3>Nuestra Visión</h3>
                     <p>Un mundo donde los residuos se minimicen, cada material sea reciclable y las comunidades prosperen en armonía con la naturaleza. Imaginamos un movimiento global donde el consumo responsable y el reciclaje se conviertan en una forma de vida, asegurando un planeta más limpio y verde para las generaciones futuras.</p>
                 </div>
@@ -79,10 +84,10 @@
     </section>
 
     <section id="conduct" class="content-section">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Código de Conducta</h2>
             <div class="grid">
-                <div class="service-item">
+                <div class="service-item" data-aos="zoom-in">
                     <h3>1. Compromiso con la Sostenibilidad</h3>
                     <p>Priorizamos la responsabilidad ambiental en todas las actividades, promoviendo la reducción de residuos, el reciclaje y los principios de economía circular.</p>
                 </div>
@@ -119,7 +124,7 @@
     </section>
 
     <section id="contact" class="content-section alt-bg">
-        <div class="container">
+        <div class="container" data-aos="fade-up">
             <h2>Contacto</h2>
             <div class="contact-container">
                 <div class="contact-info">
@@ -163,6 +168,8 @@
         </div>
     </footer>
 
+    <button id="backToTop" title="Ir arriba"><i class="fas fa-arrow-up"></i></button>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
