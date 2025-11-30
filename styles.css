@@ -69,6 +69,56 @@ nav {
     color: var(--primary-color);
 }
 
+.lang-switch {
+    margin-left: 2rem;
+    font-weight: bold;
+}
+
+.lang-switch a {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 0 5px;
+}
+
+.lang-switch a.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* RTL Support */
+[dir="rtl"] body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Ensure font supports Arabic */
+}
+
+[dir="rtl"] .nav-links li {
+    margin-left: 0;
+    margin-right: 2rem;
+}
+
+[dir="rtl"] .lang-switch {
+    margin-left: 0;
+    margin-right: 2rem;
+}
+
+[dir="rtl"] .hero-content {
+    text-align: right;
+}
+
+[dir="rtl"] .service-item,
+[dir="rtl"] .goals-list,
+[dir="rtl"] .contact-container {
+    text-align: right;
+}
+
+[dir="rtl"] .goals-list li i {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+[dir="rtl"] .social-links a {
+    flex-direction: row; /* Keep icon next to text */
+}
+
 /* Hero Section */
 .hero {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
