@@ -82,7 +82,9 @@ nav {
 
 .logo img {
     height: 50px; /* Adjust based on your logo's aspect ratio */
-    width: auto;
+    width: 50px;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .nav-links {
