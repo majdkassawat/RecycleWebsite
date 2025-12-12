@@ -23,8 +23,16 @@ TAGLINE = "Today's waste, tomorrow's energy"
 img = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
 draw = ImageDraw.Draw(img)
 
-# Draw main SQUARE background
-draw.rectangle([(0, 0), (WIDTH, HEIGHT)], fill=BG_COLOR)
+# Draw main circular background
+# Leave a small margin for the cut line
+margin = 20
+circle_radius = (WIDTH // 2) - margin
+center = (WIDTH // 2, HEIGHT // 2)
+draw.ellipse(
+    [(center[0] - circle_radius, center[1] - circle_radius),
+     (center[0] + circle_radius, center[1] + circle_radius)],
+    fill=BG_COLOR
+)
 
 # Try to load fonts
 try:
@@ -45,7 +53,7 @@ except:
 
 # 1. Logo (Top, Bigger than QR)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 820 # Adjusted for better fit
+logo_size = 900 # 1.5x bigger (approx from 600)
 logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
 # 2. QR Code (Bottom, Smaller than Logo)
@@ -110,12 +118,12 @@ qr_y = qr_bg_y + qr_bg_padding
 img.paste(qr, (qr_x, qr_y), qr)
 
 # Add a nice border
-border_width = 20
-draw.rectangle(
-    [(border_width//2, border_width//2), (WIDTH - border_width//2, HEIGHT - border_width//2)],
-    outline=TEXT_COLOR,
-    width=border_width
-)
+# border_width = 20
+# draw.rectangle(
+#     [(border_width//2, border_width//2), (WIDTH - border_width//2, HEIGHT - border_width//2)],
+#     outline=TEXT_COLOR,
+#     width=border_width
+# )
 
 # Save
 img.save(output_path, 'PNG', dpi=(300, 300))
