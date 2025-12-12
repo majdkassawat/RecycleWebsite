@@ -53,7 +53,7 @@ except:
 
 # 1. Logo (Top, Bigger than QR)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 900 # 1.5x bigger (approx from 600)
+logo_size = 820 # Adjusted for better fit
 logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
 # 2. QR Code (Bottom, Smaller than Logo)
@@ -63,18 +63,18 @@ qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 
 # Calculate positions to center everything vertically
 # Total height estimation:
-# Logo (900) + Gap (15) + Join Us (80) + Gap (10) + Slogan (70) + Gap (10) + Tagline (60) + Gap (20) + QR (350)
-# Total approx = 1515px. Available height ~1760px.
-# Start Y = (1800 - 1515) / 2 = 142px
+# Logo (820) + Gap (40) + Join Us (80) + Gap (20) + Slogan (70) + Gap (20) + Tagline (60) + Gap (50) + QR (350)
+# Total approx = 1490px. Available height ~1760px.
+# Start Y = (1800 - 1490) / 2 = 155px
 
-start_y = 140
+start_y = 155
 
 # Draw Logo
 logo_x = (WIDTH - logo_size) // 2
 logo_y = start_y
 img.paste(logo, (logo_x, logo_y), logo)
 
-current_y = logo_y + logo_size + 15
+current_y = logo_y + logo_size + 40
 
 # Draw "Join Us"
 bbox = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
@@ -82,7 +82,7 @@ text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
-current_y += text_height + 10
+current_y += text_height + 20
 
 # Draw Slogan
 bbox = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
@@ -90,7 +90,7 @@ text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), SLOGAN, fill=TEXT_COLOR, font=font_slogan)
-current_y += text_height + 10
+current_y += text_height + 20
 
 # Draw Tagline
 bbox = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
@@ -98,7 +98,7 @@ text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), TAGLINE, fill=TEXT_COLOR, font=font_tagline)
-current_y += text_height + 20
+current_y += text_height + 50
 
 # Draw QR Code
 # White background for QR
