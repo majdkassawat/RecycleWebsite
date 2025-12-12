@@ -53,7 +53,7 @@ except:
 
 # 1. Logo (Top, Bigger than QR)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 600 # Slightly reduced to balance with QR
+logo_size = 750 # Even bigger
 logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
 # 2. QR Code (Bottom, Smaller than Logo)
@@ -63,11 +63,11 @@ qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 
 # Calculate positions to center everything vertically
 # Total height estimation:
-# Logo (650) + Gap (30) + Join Us (80) + Gap (20) + Slogan (70) + Gap (20) + Tagline (60) + Gap (40) + QR (400)
-# Total approx = 1370px. Available height ~1760px.
-# Start Y = (1800 - 1370) / 2 = 215px
+# Logo (750) + Gap (30) + Join Us (80) + Gap (20) + Slogan (70) + Gap (20) + Tagline (60) + Gap (40) + QR (480)
+# Total approx = 1550px. Available height ~1760px.
+# Start Y = (1800 - 1550) / 2 = 125px
 
-start_y = 180
+start_y = 125
 
 # Draw Logo
 logo_x = (WIDTH - logo_size) // 2
