@@ -1,0 +1,65 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "abort_merge",
+			"type": "shell",
+			"command": "git merge --abort",
+			"args": [],
+			"isBackground": false,
+			"group": "none"
+		},
+		{
+			"label": "git_pull_no_edit",
+			"type": "shell",
+			"command": "git pull --no-edit",
+			"args": [],
+			"isBackground": false,
+			"group": "none"
+		},
+		{
+			"label": "git_push",
+			"type": "shell",
+			"command": "git push",
+			"args": [],
+			"isBackground": false,
+			"group": "none"
+		},
+		{
+			"label": "remove_old_docs",
+			"type": "shell",
+			"command": "git rm \"resources/first data file_ENG.docx\"; git rm \"resources/Mission and vision Statement.docx\""
+		},
+		{
+			"label": "delete_old_resources",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -LiteralPath 'resources/first data file_ENG.docx' -ErrorAction SilentlyContinue; Remove-Item -LiteralPath 'resources/Mission and vision Statement.docx' -ErrorAction SilentlyContinue; if (Test-Path 'resources/first data file_ENG.docx' -or Test-Path 'resources/Mission and vision Statement.docx') { exit 1 }\""
+		},
+		{
+			"label": "delete_old1",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -LiteralPath 'resources/first data file_ENG.docx' -ErrorAction SilentlyContinue\""
+		},
+		{
+			"label": "delete_old1_fix",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -LiteralPath \\\"resources/first data file_ENG.docx\\\" -ErrorAction SilentlyContinue\""
+		},
+		{
+			"label": "delete_unreviewed",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$files = Get-ChildItem -Path resources -Filter *.docx; foreach ($f in $files) { if ($f.Name -notmatch '^(Reviewed|Reviwed)') { Remove-Item -LiteralPath $f.FullName -Force } }\""
+		},
+		{
+			"label": "git_stage_commit_push",
+			"type": "shell",
+			"command": "git add .; git commit -m \"Add Resources section with reviewed documents across all languages\"; git push",
+			"group": "none"
+		},
+		{
+			"label": "git_stage_commit_push_simple",
+			"type": "shell",
+			"command": "git add .; git commit -m update; git push"
+		}
+	]
+}
