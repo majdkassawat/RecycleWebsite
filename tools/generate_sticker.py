@@ -12,7 +12,8 @@ output_path = os.path.join(images_dir, 'tadweer_sticker.png')
 # 6x6 inches at 300 DPI = 1800x1800 pixels
 WIDTH = 1800
 HEIGHT = 1800
-BG_COLOR = (46, 125, 50)   # Primary green
+BG_COLOR = (165, 214, 167)   # Light green
+TEXT_COLOR = (27, 94, 32)    # Dark green
 WHITE = (255, 255, 255)
 JOIN_US_TEXT = "Join Us"
 SLOGAN = "We give value to your garbage"
@@ -80,7 +81,7 @@ bbox = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
 text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), JOIN_US_TEXT, fill=WHITE, font=font_join)
+draw.text((x_pos, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
 current_y += text_height + 20
 
 # Draw Slogan
@@ -88,7 +89,7 @@ bbox = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
 text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), SLOGAN, fill=WHITE, font=font_slogan)
+draw.text((x_pos, current_y), SLOGAN, fill=TEXT_COLOR, font=font_slogan)
 current_y += text_height + 20
 
 # Draw Tagline
@@ -96,7 +97,7 @@ bbox = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
 text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), TAGLINE, fill=(230, 230, 230), font=font_tagline)
+draw.text((x_pos, current_y), TAGLINE, fill=TEXT_COLOR, font=font_tagline)
 current_y += text_height + 50
 
 # Draw QR Code
@@ -120,7 +121,7 @@ border_width = 20
 draw.ellipse(
     [(center[0] - circle_radius + border_width//2, center[1] - circle_radius + border_width//2),
      (center[0] + circle_radius - border_width//2, center[1] + circle_radius - border_width//2)],
-    outline=WHITE,
+    outline=TEXT_COLOR,
     width=border_width
 )
 
