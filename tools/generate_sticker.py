@@ -53,11 +53,11 @@ except:
 
 # 1. Logo (Top, Bigger than QR)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 650 # Big logo
+logo_size = 600 # Slightly reduced to balance with QR
 logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
 # 2. QR Code (Bottom, Smaller than Logo)
-qr_size = 400 # Smaller than logo
+qr_size = 480 # Increased to be closer to logo size but still smaller
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 
@@ -107,8 +107,9 @@ qr_bg_size = qr_size + (qr_bg_padding * 2)
 qr_bg_x = (WIDTH - qr_bg_size) // 2
 qr_bg_y = current_y
 
-draw.ellipse(
+draw.rounded_rectangle(
     [(qr_bg_x, qr_bg_y), (qr_bg_x + qr_bg_size, qr_bg_y + qr_bg_size)],
+    radius=30,
     fill=WHITE
 )
 
