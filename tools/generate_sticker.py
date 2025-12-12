@@ -53,28 +53,28 @@ except:
 
 # 1. Logo (Top, Bigger than QR)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 750 # Even bigger
+logo_size = 900 # 1.5x bigger (approx from 600)
 logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
 # 2. QR Code (Bottom, Smaller than Logo)
-qr_size = 480 # Increased to be closer to logo size but still smaller
+qr_size = 350 # Reduced to fit
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 
 # Calculate positions to center everything vertically
 # Total height estimation:
-# Logo (750) + Gap (30) + Join Us (80) + Gap (20) + Slogan (70) + Gap (20) + Tagline (60) + Gap (40) + QR (480)
-# Total approx = 1550px. Available height ~1760px.
-# Start Y = (1800 - 1550) / 2 = 125px
+# Logo (900) + Gap (15) + Join Us (80) + Gap (10) + Slogan (70) + Gap (10) + Tagline (60) + Gap (20) + QR (350)
+# Total approx = 1515px. Available height ~1760px.
+# Start Y = (1800 - 1515) / 2 = 142px
 
-start_y = 125
+start_y = 140
 
 # Draw Logo
 logo_x = (WIDTH - logo_size) // 2
 logo_y = start_y
 img.paste(logo, (logo_x, logo_y), logo)
 
-current_y = logo_y + logo_size + 30
+current_y = logo_y + logo_size + 15
 
 # Draw "Join Us"
 bbox = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
@@ -82,7 +82,7 @@ text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
-current_y += text_height + 20
+current_y += text_height + 10
 
 # Draw Slogan
 bbox = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
@@ -90,7 +90,7 @@ text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), SLOGAN, fill=TEXT_COLOR, font=font_slogan)
-current_y += text_height + 20
+current_y += text_height + 10
 
 # Draw Tagline
 bbox = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
@@ -98,7 +98,7 @@ text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), TAGLINE, fill=TEXT_COLOR, font=font_tagline)
-current_y += text_height + 50
+current_y += text_height + 20
 
 # Draw QR Code
 # White background for QR
