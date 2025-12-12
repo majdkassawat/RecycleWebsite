@@ -60,6 +60,136 @@
 			"label": "git_stage_commit_push_simple",
 			"type": "shell",
 			"command": "git add .; git commit -m update; git push"
+		},
+		{
+			"label": "extract_resources",
+			"type": "shell",
+			"command": "python tools/extract_resources.py"
+		},
+		{
+			"label": "download_qr_codes",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -Uri 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Ftadweer-tech-sy.org' -OutFile 'images/qr_website.png'; Invoke-WebRequest -Uri 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.instagram.com%2Ftadweer_sy%3Figsh%3DeHZ5dHh3azJsNzhs' -OutFile 'images/qr_instagram.png'; Invoke-WebRequest -Uri 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61577997235876' -OutFile 'images/qr_facebook.png'\""
+		},
+		{
+			"label": "download_qr_codes_fix",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ProgressPreference='SilentlyContinue'; (New-Object System.Net.WebClient).DownloadFile('https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Ftadweer-tech-sy.org','images/qr_website.png'); (New-Object System.Net.WebClient).DownloadFile('https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.instagram.com%2Ftadweer_sy%3Figsh%3DeHZ5dHh3azJsNzhs','images/qr_instagram.png'); (New-Object System.Net.WebClient).DownloadFile('https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61577997235876','images/qr_facebook.png')\""
+		},
+		{
+			"label": "qr1",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Invoke-WebRequest -Uri 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Ftadweer-tech-sy.org' -OutFile 'images/qr_website.png'\""
+		},
+		{
+			"label": "qr1_pw_escaped",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$u='https://api.qrserver.com/v1/create-qr-code/?size=600x600`&data=https%3A%2F%2Ftadweer-tech-sy.org'; Invoke-WebRequest -Uri $u -OutFile 'images/qr_website.png'\""
+		},
+		{
+			"label": "curl_qr_images",
+			"type": "shell",
+			"command": "cmd /c \"curl.exe -L \"https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Ftadweer-tech-sy.org\" -o images\\qr_website.png & curl.exe -L \"https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.instagram.com%2Ftadweer_sy%3Figsh%3DeHZ5dHh3azJsNzhs\" -o images\\qr_instagram.png & curl.exe -L \"https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61577997235876\" -o images\\qr_facebook.png\""
+		},
+		{
+			"label": "run_gen_qr",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_qr.ps1"
+		},
+		{
+			"label": "extract_docx_via_xml",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$e1='resources/_x1'; $e2='resources/_x2'; Remove-Item -Recurse -Force $e1,$e2 -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path $e1,$e2 | Out-Null; Expand-Archive -Force -Path 'resources/Reviewed - first data file_ENG.docx' -DestinationPath $e1; Expand-Archive -Force -Path 'resources/Reviwed - Mission and vision Statement 1.docx' -DestinationPath $e2; $t1 = Get-Content -Raw -LiteralPath (Join-Path $e1 'word/document.xml'); $t2 = Get-Content -Raw -LiteralPath (Join-Path $e2 'word/document.xml'); $plain1 = [System.Text.RegularExpressions.Regex]::Replace($t1,'<[^>]+>',' '); $plain2 = [System.Text.RegularExpressions.Regex]::Replace($t2,'<[^>]+>',' '); Write-Output '---FILE1---'; Write-Output $plain1; Write-Output '---FILE2---'; Write-Output $plain2;\""
+		},
+		{
+			"label": "check_files",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Get-ChildItem -LiteralPath resources | Select-Object Name,Length\""
+		},
+		{
+			"label": "check_files2",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Get-ChildItem -LiteralPath resources | Format-Table -AutoSize\""
+		},
+		{
+			"label": "expand_docx",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force 'resources/_x1','resources/_x2' -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path 'resources/_x1','resources/_x2' | Out-Null; Expand-Archive -Force -LiteralPath 'resources/Reviewed - first data file_ENG.docx' -DestinationPath 'resources/_x1'; Expand-Archive -Force -LiteralPath 'resources/Reviwed - Mission and vision Statement 1.docx' -DestinationPath 'resources/_x2'; 'Expanded'\""
+		},
+		{
+			"label": "expand_docx_zipcopy",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$e1='resources/_x1'; $e2='resources/_x2'; Remove-Item -Recurse -Force $e1,$e2 -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path $e1,$e2 | Out-Null; Copy-Item -LiteralPath 'resources/Reviewed - first data file_ENG.docx' 'resources/_tmp1.zip' -Force; Copy-Item -LiteralPath 'resources/Reviwed - Mission and vision Statement 1.docx' 'resources/_tmp2.zip' -Force; Expand-Archive -Force -LiteralPath 'resources/_tmp1.zip' -DestinationPath $e1; Expand-Archive -Force -LiteralPath 'resources/_tmp2.zip' -DestinationPath $e2; Remove-Item 'resources/_tmp1.zip','resources/_tmp2.zip' -Force; 'ExpandedOK'\""
+		},
+		{
+			"label": "expand1",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force 'resources/_x1' -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path 'resources/_x1' | Out-Null; Copy-Item -LiteralPath 'resources/Reviewed - first data file_ENG.docx' 'resources/_tmp1.zip' -Force; Expand-Archive -Force -LiteralPath 'resources/_tmp1.zip' -DestinationPath 'resources/_x1'; Remove-Item 'resources/_tmp1.zip' -Force; 'Done1'\""
+		},
+		{
+			"label": "expand2",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force 'resources/_x2' -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path 'resources/_x2' | Out-Null; Copy-Item -LiteralPath 'resources/Reviwed - Mission and vision Statement 1.docx' 'resources/_tmp2.zip' -Force; Expand-Archive -Force -LiteralPath 'resources/_tmp2.zip' -DestinationPath 'resources/_x2'; Remove-Item 'resources/_tmp2.zip' -Force; 'Done2'\""
+		},
+		{
+			"label": "read_xmls",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$t1 = Get-Content -Raw -LiteralPath 'resources/_x1/word/document.xml'; $t2 = Get-Content -Raw -LiteralPath 'resources/_x2/word/document.xml'; $plain1 = ($t1 -replace '<[^>]+>',' ') -replace '\\s+',' '; $plain2 = ($t2 -replace '<[^>]+>',' ') -replace '\\s+',' '; Write-Output '---FILE1---'; Write-Output $plain1; Write-Output '---FILE2---'; Write-Output $plain2;\""
+		},
+		{
+			"label": "write_extracted_txt",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$t1 = Get-Content -Raw -LiteralPath 'resources/_x1/word/document.xml'; $t2 = Get-Content -Raw -LiteralPath 'resources/_x2/word/document.xml'; $plain1 = ($t1 -replace '<[^>]+>',' ') -replace '\\s+',' '; $plain2 = ($t2 -replace '<[^>]+>',' ') -replace '\\s+',' '; Set-Content -LiteralPath 'resources/_x1_extracted.txt' -Value $plain1; Set-Content -LiteralPath 'resources/_x2_extracted.txt' -Value $plain2; 'Saved extracted text'\""
+		},
+		{
+			"label": "git_commit_push_qr_content",
+			"type": "shell",
+			"command": "git add .; git commit -m \"Update content from reviewed docs; add Resources sections; add QR images and embed in footers\"; git push"
+		},
+		{
+			"label": "git_commit_push_qr_content_fix",
+			"type": "shell",
+			"command": "git add . ; git commit -m \"Update content from reviewed docs; embed QR codes\" ; git push"
+		},
+		{
+			"label": "cleanup_files_cmd",
+			"type": "shell",
+			"command": "cmd /c del \"resources\\first data file_ENG.docx\""
+		},
+		{
+			"label": "powershell_delete_verified",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$files=@('resources/first data file_ENG.docx','resources/Mission and vision Statement.docx'); foreach($p in $files){ if (Test-Path -LiteralPath $p){ Remove-Item -LiteralPath $p -Force; Write-Host \\\"Deleted: $p\\\" } else { Write-Host \\\"Not found: $p\\\" } }\""
+		},
+		{
+			"label": "git_remove_resources",
+			"type": "shell",
+			"command": "git rm -r --cached resources; git add -A; git commit -m \"Remove resources from published site\"; git push"
+		},
+		{
+			"label": "finalize_remove_resources",
+			"type": "shell",
+			"command": "git add -A ; git commit -m \"Remove resources directory from site\" ; git push"
+		},
+		{
+			"label": "move_resources_out",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"New-Item -ItemType Directory -Force -Path '../_private' | Out-Null; Move-Item -LiteralPath 'resources/*' -Destination '../_private' -Force; Write-Host 'Moved resources to _private'\""
+		},
+		{
+			"label": "git_remove_dir",
+			"type": "shell",
+			"command": "git rm -r resources ; git commit -m \"Remove resources directory\" ; git push"
+		},
+		{
+			"label": "git_remove_dir_force",
+			"type": "shell",
+			"command": "git rm -r -f resources ; git commit -m \"Remove resources directory\" ; git push"
+		},
+		{
+			"label": "commit_remove_resources_sections",
+			"type": "shell",
+			"command": "git add -A ; git commit -m \"Remove Resources sections from all pages\" ; git push"
 		}
 	]
 }
