@@ -23,16 +23,8 @@ TAGLINE = "Today's waste, tomorrow's energy"
 img = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
 draw = ImageDraw.Draw(img)
 
-# Draw main circular background
-# Leave a small margin for the cut line
-margin = 20
-circle_radius = (WIDTH // 2) - margin
-center = (WIDTH // 2, HEIGHT // 2)
-draw.ellipse(
-    [(center[0] - circle_radius, center[1] - circle_radius),
-     (center[0] + circle_radius, center[1] + circle_radius)],
-    fill=BG_COLOR
-)
+# Draw main SQUARE background
+draw.rectangle([(0, 0), (WIDTH, HEIGHT)], fill=BG_COLOR)
 
 # Try to load fonts
 try:
@@ -117,11 +109,10 @@ qr_x = (WIDTH - qr_size) // 2
 qr_y = qr_bg_y + qr_bg_padding
 img.paste(qr, (qr_x, qr_y), qr)
 
-# Add a nice border ring
+# Add a nice border
 border_width = 20
-draw.ellipse(
-    [(center[0] - circle_radius + border_width//2, center[1] - circle_radius + border_width//2),
-     (center[0] + circle_radius - border_width//2, center[1] + circle_radius - border_width//2)],
+draw.rectangle(
+    [(border_width//2, border_width//2), (WIDTH - border_width//2, HEIGHT - border_width//2)],
     outline=TEXT_COLOR,
     width=border_width
 )
