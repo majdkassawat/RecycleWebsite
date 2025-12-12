@@ -10,8 +10,8 @@ qr_path = os.path.join(images_dir, 'qr_website.png')
 # Constants
 WIDTH = 1200
 HEIGHT = 1200
-SLOGAN = "We Give the Value of Your Waste"
-TAGLINE = "Today's residues, tomorrow's energy"
+SLOGAN = "We give value to your garbage"
+TAGLINE = "Today's waste, tomorrow's energy"
 
 def create_sticker(filename, config):
     # Unpack config

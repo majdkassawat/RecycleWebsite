@@ -13,8 +13,8 @@ WIDTH = 1200
 HEIGHT = 1200
 BG_COLOR = (46, 125, 50)   # Primary green
 WHITE = (255, 255, 255)
-SLOGAN = "We Give the Value of Your Waste"
-TAGLINE = "Today's residues, tomorrow's energy"
+SLOGAN = "We give value to your garbage"
+TAGLINE = "Today's waste, tomorrow's energy"
 WEBSITE = "tadweer-tech-sy.org"
 
 # Create canvas
