@@ -9,20 +9,23 @@ qr_path = os.path.join(images_dir, 'qr_website.png')
 output_path = os.path.join(images_dir, 'tadweer_sticker.png')
 
 # Configuration
-WIDTH = 1200
-HEIGHT = 1200
+# 6x6 inches at 300 DPI = 1800x1800 pixels
+WIDTH = 1800
+HEIGHT = 1800
 BG_COLOR = (46, 125, 50)   # Primary green
 WHITE = (255, 255, 255)
+JOIN_US_TEXT = "Join Us"
 SLOGAN = "We give value to your garbage"
 TAGLINE = "Today's waste, tomorrow's energy"
-WEBSITE = "tadweer-tech-sy.org"
 
 # Create canvas
 img = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
 draw = ImageDraw.Draw(img)
 
 # Draw main circular background
-circle_radius = 580
+# Leave a small margin for the cut line
+margin = 20
+circle_radius = (WIDTH // 2) - margin
 center = (WIDTH // 2, HEIGHT // 2)
 draw.ellipse(
     [(center[0] - circle_radius, center[1] - circle_radius),
@@ -33,27 +36,54 @@ draw.ellipse(
 # Try to load fonts
 try:
     # Windows fonts usually available
-    font_slogan = ImageFont.truetype("arialbd.ttf", 65)
-    font_tagline = ImageFont.truetype("arial.ttf", 40)
-    font_website = ImageFont.truetype("arialbd.ttf", 45)
+    # Adjusted sizes for 1800px
+    font_join = ImageFont.truetype("arialbd.ttf", 70)
+    font_slogan = ImageFont.truetype("arialbd.ttf", 60) # Smaller than before relative to size
+    font_tagline = ImageFont.truetype("arial.ttf", 50)
 except:
     # Fallback
+    font_join = ImageFont.load_default()
     font_slogan = ImageFont.load_default()
     font_tagline = ImageFont.load_default()
-    font_website = ImageFont.load_default()
 
-# 1. Logo (Top)
+# Layout Calculation
+# We have ~1600px vertical space inside the circle to play with.
+# Order: Logo -> Join Us -> Slogan -> Tagline -> QR
+
+# 1. Logo (Top, Bigger than QR)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 380
+logo_size = 650 # Big logo
 logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
+
+# 2. QR Code (Bottom, Smaller than Logo)
+qr_size = 400 # Smaller than logo
+qr = Image.open(qr_path).convert('RGBA')
+qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
+
+# Calculate positions to center everything vertically
+# Total height estimation:
+# Logo (650) + Gap (30) + Join Us (80) + Gap (20) + Slogan (70) + Gap (20) + Tagline (60) + Gap (40) + QR (400)
+# Total approx = 1370px. Available height ~1760px.
+# Start Y = (1800 - 1370) / 2 = 215px
+
+start_y = 180
+
+# Draw Logo
 logo_x = (WIDTH - logo_size) // 2
-logo_y = 100 # Start closer to top
+logo_y = start_y
 img.paste(logo, (logo_x, logo_y), logo)
 
-# 2. Text Block (Middle)
 current_y = logo_y + logo_size + 30
 
-# Slogan
+# Draw "Join Us"
+bbox = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
+text_width = bbox[2] - bbox[0]
+text_height = bbox[3] - bbox[1]
+x_pos = (WIDTH - text_width) // 2
+draw.text((x_pos, current_y), JOIN_US_TEXT, fill=WHITE, font=font_join)
+current_y += text_height + 20
+
+# Draw Slogan
 bbox = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
 text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
@@ -61,43 +91,32 @@ x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), SLOGAN, fill=WHITE, font=font_slogan)
 current_y += text_height + 20
 
-# Tagline
+# Draw Tagline
 bbox = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
 text_width = bbox[2] - bbox[0]
 text_height = bbox[3] - bbox[1]
 x_pos = (WIDTH - text_width) // 2
 draw.text((x_pos, current_y), TAGLINE, fill=(230, 230, 230), font=font_tagline)
-current_y += text_height + 40
+current_y += text_height + 50
 
-# 3. QR Code (Bottom)
-qr_size = 320
-qr = Image.open(qr_path).convert('RGBA')
-qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
-
-# Draw a white background for QR to ensure contrast
-qr_bg_padding = 10
+# Draw QR Code
+# White background for QR
+qr_bg_padding = 20
 qr_bg_size = qr_size + (qr_bg_padding * 2)
 qr_bg_x = (WIDTH - qr_bg_size) // 2
 qr_bg_y = current_y
+
 draw.ellipse(
     [(qr_bg_x, qr_bg_y), (qr_bg_x + qr_bg_size, qr_bg_y + qr_bg_size)],
     fill=WHITE
 )
 
-# Paste QR centered in the white circle
 qr_x = (WIDTH - qr_size) // 2
 qr_y = qr_bg_y + qr_bg_padding
 img.paste(qr, (qr_x, qr_y), qr)
 
-# 4. Website URL (Bottom curve area)
-current_y = qr_y + qr_size + 25
-bbox = draw.textbbox((0, 0), WEBSITE, font=font_website)
-text_width = bbox[2] - bbox[0]
-x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), WEBSITE, fill=WHITE, font=font_website)
-
 # Add a nice border ring
-border_width = 15
+border_width = 20
 draw.ellipse(
     [(center[0] - circle_radius + border_width//2, center[1] - circle_radius + border_width//2),
      (center[0] + circle_radius - border_width//2, center[1] + circle_radius - border_width//2)],
@@ -108,3 +127,4 @@ draw.ellipse(
 # Save
 img.save(output_path, 'PNG', dpi=(300, 300))
 print(f'Sticker created successfully: {output_path}')
+print(f'Size: {WIDTH}x{HEIGHT}px (6x6 inches @ 300 DPI)')
