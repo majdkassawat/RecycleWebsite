@@ -97,7 +97,7 @@ h_join = bbox_join[3] - bbox_join[1]
 w_join = bbox_join[2] - bbox_join[0]
 
 gap_logo_join = 5 # Tight gap
-gap_join_qr = 5 # Tight gap
+gap_join_qr = 20 # Increased gap to push QR lower
 
 total_content_height = logo_h + gap_logo_join + h_join + gap_join_qr + qr_bg_size
 
