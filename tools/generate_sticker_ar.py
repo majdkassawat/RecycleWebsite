@@ -73,7 +73,7 @@ except:
 
 # 1. Logo (Aspect Ratio Preserved)
 logo = Image.open(logo_path).convert('RGBA')
-max_logo_size = 300 # Max dimension
+max_logo_size = 250 # Reduced size for better spacing
 w, h = logo.size
 aspect_ratio = w / h
 
@@ -88,13 +88,15 @@ logo = logo.resize((new_w, new_h), Image.LANCZOS)
 logo_w, logo_h = logo.size
 
 # 2. QR Code
-qr_size = 100 # Smaller QR
+qr_size = 90 # Slightly smaller
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
+qr_bg_padding = 5
+qr_bg_size = qr_size + (qr_bg_padding * 2)
 
 # Draw Curved Text
 # Radius for text: slightly less than circle radius
-text_radius = circle_radius - 35
+text_radius = circle_radius - 40 # Move text slightly inwards
 
 # Top: Slogan
 draw_text_on_arc(img, SLOGAN, font_slogan, center, text_radius, 270, TEXT_COLOR, is_bottom=False)
@@ -102,26 +104,32 @@ draw_text_on_arc(img, SLOGAN, font_slogan, center, text_radius, 270, TEXT_COLOR,
 # Bottom: Tagline
 draw_text_on_arc(img, TAGLINE, font_tagline, center, text_radius, 90, TEXT_COLOR, is_bottom=True)
 
-# Center Content
-# Logo in center
-logo_x = (WIDTH - logo_w) // 2
-logo_y = (HEIGHT - logo_h) // 2 - 20 # Shift up slightly to make room for QR/Join Us
-img.paste(logo, (logo_x, logo_y), logo)
-
-# Join Us + QR below logo
-current_y = logo_y + logo_h + 10
-
-# Draw "Join Us"
+# Calculate Vertical Layout for Center Content
+# Stack: Logo -> Gap -> Join Us -> Gap -> QR
 bbox_join = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
-w_join = bbox_join[2] - bbox_join[0]
 h_join = bbox_join[3] - bbox_join[1]
+w_join = bbox_join[2] - bbox_join[0]
+
+gap_logo_join = 15
+gap_join_qr = 10
+
+total_content_height = logo_h + gap_logo_join + h_join + gap_join_qr + qr_bg_size
+
+# Center the stack vertically in the canvas
+start_y = (HEIGHT - total_content_height) // 2
+
+current_y = start_y
+
+# 1. Draw Logo
+logo_x = (WIDTH - logo_w) // 2
+img.paste(logo, (logo_x, current_y), logo)
+current_y += logo_h + gap_logo_join
+
+# 2. Draw "Join Us"
 draw.text(((WIDTH - w_join) // 2, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
+current_y += h_join + gap_join_qr
 
-current_y += h_join + 5
-
-# Draw QR
-qr_bg_padding = 5
-qr_bg_size = qr_size + (qr_bg_padding * 2)
+# 3. Draw QR
 qr_bg_x = (WIDTH - qr_bg_size) // 2
 qr_bg_y = current_y
 
