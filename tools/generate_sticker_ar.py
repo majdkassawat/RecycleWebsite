@@ -1,7 +1,12 @@
 from PIL import Image, ImageDraw, ImageFont
 import os
+import sys
 import arabic_reshaper
 from bidi.algorithm import get_display
+
+# Add current directory to path to import sticker_utils
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from sticker_utils import draw_text_on_arc
 
 # Paths
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,7 +58,7 @@ try:
     # Windows fonts usually available
     # Adjusted sizes for 709px (6cm)
     font_join = ImageFont.truetype("arialbd.ttf", 35)
-    font_slogan = ImageFont.truetype("arialbd.ttf", 30)
+    font_slogan = ImageFont.truetype("arialbd.ttf", 35)
     font_tagline = ImageFont.truetype("arial.ttf", 25)
 except:
     # Fallback
@@ -62,7 +67,9 @@ except:
     font_tagline = ImageFont.load_default()
 
 # Layout Calculation
-# Order: Slogan -> Logo -> Join Us -> Tagline -> QR
+# Curved Text: Slogan (Top), Tagline (Bottom)
+# Center: Logo
+# QR: Small below logo? Or integrated?
 
 # 1. Logo (Aspect Ratio Preserved)
 logo = Image.open(logo_path).convert('RGBA')
@@ -81,66 +88,54 @@ logo = logo.resize((new_w, new_h), Image.LANCZOS)
 logo_w, logo_h = logo.size
 
 # 2. QR Code
-qr_size = 130
+qr_size = 100 # Smaller QR
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 
-# Calculate Heights
-bbox_slogan = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
-h_slogan = bbox_slogan[3] - bbox_slogan[1]
+# Draw Curved Text
+# Radius for text: slightly less than circle radius
+text_radius = circle_radius - 35
 
-bbox_join = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
-h_join = bbox_join[3] - bbox_join[1]
+# Top: Slogan
+draw_text_on_arc(img, SLOGAN, font_slogan, center, text_radius, 270, TEXT_COLOR, is_bottom=False)
 
-bbox_tagline = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
-h_tagline = bbox_tagline[3] - bbox_tagline[1]
+# Bottom: Tagline
+draw_text_on_arc(img, TAGLINE, font_tagline, center, text_radius, 90, TEXT_COLOR, is_bottom=True)
 
-qr_bg_padding = 8
-qr_bg_size = qr_size + (qr_bg_padding * 2)
-
-# Gaps
-gap_slogan_logo = 10
-gap_logo_join = 10
-gap_join_tagline = 5
-gap_tagline_qr = 15
-
-total_height = h_slogan + gap_slogan_logo + logo_h + gap_logo_join + h_join + gap_join_tagline + h_tagline + gap_tagline_qr + qr_bg_size
-
-start_y = (HEIGHT - total_height) // 2
-current_y = start_y
-
-# Draw Slogan
-w_slogan = bbox_slogan[2] - bbox_slogan[0]
-draw.text(((WIDTH - w_slogan) // 2, current_y), SLOGAN, fill=TEXT_COLOR, font=font_slogan)
-current_y += h_slogan + gap_slogan_logo
-
-# Draw Logo
+# Center Content
+# Logo in center
 logo_x = (WIDTH - logo_w) // 2
-img.paste(logo, (logo_x, current_y), logo)
-current_y += logo_h + gap_logo_join
+logo_y = (HEIGHT - logo_h) // 2 - 20 # Shift up slightly to make room for QR/Join Us
+img.paste(logo, (logo_x, logo_y), logo)
 
-# Draw Join Us
+# Join Us + QR below logo
+current_y = logo_y + logo_h + 10
+
+# Draw "Join Us"
+bbox_join = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
 w_join = bbox_join[2] - bbox_join[0]
+h_join = bbox_join[3] - bbox_join[1]
 draw.text(((WIDTH - w_join) // 2, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
-current_y += h_join + gap_join_tagline
 
-# Draw Tagline
-w_tagline = bbox_tagline[2] - bbox_tagline[0]
-draw.text(((WIDTH - w_tagline) // 2, current_y), TAGLINE, fill=TEXT_COLOR, font=font_tagline)
-current_y += h_tagline + gap_tagline_qr
+current_y += h_join + 5
 
 # Draw QR
+qr_bg_padding = 5
+qr_bg_size = qr_size + (qr_bg_padding * 2)
 qr_bg_x = (WIDTH - qr_bg_size) // 2
+qr_bg_y = current_y
+
 draw.rounded_rectangle(
-    [(qr_bg_x, current_y), (qr_bg_x + qr_bg_size, current_y + qr_bg_size)],
-    radius=15,
+    [(qr_bg_x, qr_bg_y), (qr_bg_x + qr_bg_size, qr_bg_y + qr_bg_size)],
+    radius=10,
     fill=WHITE
 )
 qr_x = (WIDTH - qr_size) // 2
-qr_y = current_y + qr_bg_padding
+qr_y = qr_bg_y + qr_bg_padding
 img.paste(qr, (qr_x, qr_y), qr)
 
 # Save
 img.save(output_path, 'PNG', dpi=(300, 300))
 print(f'Sticker created successfully: {output_path}')
 print(f'Size: {WIDTH}x{HEIGHT}px (6x6 cm @ 300 DPI)')
+
