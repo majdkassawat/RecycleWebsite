@@ -73,7 +73,7 @@ except:
 
 # 1. Logo (Aspect Ratio Preserved)
 logo = Image.open(logo_path).convert('RGBA')
-max_logo_size = 300 # Reduced to prevent overlap
+max_logo_size = 340 # Increased size
 w, h = logo.size
 aspect_ratio = w / h
 
@@ -88,7 +88,7 @@ logo = logo.resize((new_w, new_h), Image.LANCZOS)
 logo_w, logo_h = logo.size
 
 # 2. QR Code
-qr_size = 120 # Reduced to prevent overlap
+qr_size = 135 # Increased size
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 qr_bg_padding = 5
@@ -96,7 +96,7 @@ qr_bg_size = qr_size + (qr_bg_padding * 2)
 
 # Draw Curved Text
 # Radius for text: slightly less than circle radius
-text_radius = circle_radius - 40 # Move text slightly inwards
+text_radius = circle_radius - 30 # Move text outwards to create more space
 
 # Top: Slogan
 draw_text_on_arc(img, SLOGAN, font_slogan, center, text_radius, 270, TEXT_COLOR, is_bottom=False)
@@ -110,8 +110,8 @@ bbox_join = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
 h_join = bbox_join[3] - bbox_join[1]
 w_join = bbox_join[2] - bbox_join[0]
 
-gap_logo_join = 10 # Increased gap
-gap_join_qr = 10 # Increased gap
+gap_logo_join = 5 # Tight gap
+gap_join_qr = 5 # Tight gap
 
 total_content_height = logo_h + gap_logo_join + h_join + gap_join_qr + qr_bg_size
 
