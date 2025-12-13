@@ -62,72 +62,82 @@ except:
     font_tagline = ImageFont.load_default()
 
 # Layout Calculation
-# Order: Logo -> Join Us -> Slogan -> Tagline -> QR
+# Order: Slogan -> Logo -> Join Us -> Tagline -> QR
 
-# 1. Logo (Top, Bigger than QR)
+# 1. Logo (Aspect Ratio Preserved)
 logo = Image.open(logo_path).convert('RGBA')
-logo_size = 300 # Scaled down for 6cm
-logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
+max_logo_size = 300 # Max dimension
+w, h = logo.size
+aspect_ratio = w / h
 
-# 2. QR Code (Bottom, Smaller than Logo)
-qr_size = 130 # Scaled down for 6cm
+if w > h:
+    new_w = max_logo_size
+    new_h = int(max_logo_size / aspect_ratio)
+else:
+    new_h = max_logo_size
+    new_w = int(max_logo_size * aspect_ratio)
+
+logo = logo.resize((new_w, new_h), Image.LANCZOS)
+logo_w, logo_h = logo.size
+
+# 2. QR Code
+qr_size = 130
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 
-# Calculate positions to center everything vertically
-# Total height estimation:
-# Logo (300) + Gap (10) + Join (35) + Gap (5) + Slogan (30) + Gap (5) + Tagline (25) + Gap (15) + QR (130)
-# Total approx = 555px. Available height ~709px.
-# Start Y = (709 - 555) / 2 = 77px
+# Calculate Heights
+bbox_slogan = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
+h_slogan = bbox_slogan[3] - bbox_slogan[1]
 
-start_y = 77
+bbox_join = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
+h_join = bbox_join[3] - bbox_join[1]
 
-# Draw Logo
-logo_x = (WIDTH - logo_size) // 2
-logo_y = start_y
-img.paste(logo, (logo_x, logo_y), logo)
+bbox_tagline = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
+h_tagline = bbox_tagline[3] - bbox_tagline[1]
 
-current_y = logo_y + logo_size + 10
-
-# Draw "Join Us"
-bbox = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
-text_width = bbox[2] - bbox[0]
-text_height = bbox[3] - bbox[1]
-x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
-current_y += text_height + 5
-
-# Draw Slogan
-bbox = draw.textbbox((0, 0), SLOGAN, font=font_slogan)
-text_width = bbox[2] - bbox[0]
-text_height = bbox[3] - bbox[1]
-x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), SLOGAN, fill=TEXT_COLOR, font=font_slogan)
-current_y += text_height + 5
-
-# Draw Tagline
-bbox = draw.textbbox((0, 0), TAGLINE, font=font_tagline)
-text_width = bbox[2] - bbox[0]
-text_height = bbox[3] - bbox[1]
-x_pos = (WIDTH - text_width) // 2
-draw.text((x_pos, current_y), TAGLINE, fill=TEXT_COLOR, font=font_tagline)
-current_y += text_height + 15
-
-# Draw QR Code
-# White background for QR
 qr_bg_padding = 8
 qr_bg_size = qr_size + (qr_bg_padding * 2)
-qr_bg_x = (WIDTH - qr_bg_size) // 2
-qr_bg_y = current_y
 
+# Gaps
+gap_slogan_logo = 10
+gap_logo_join = 10
+gap_join_tagline = 5
+gap_tagline_qr = 15
+
+total_height = h_slogan + gap_slogan_logo + logo_h + gap_logo_join + h_join + gap_join_tagline + h_tagline + gap_tagline_qr + qr_bg_size
+
+start_y = (HEIGHT - total_height) // 2
+current_y = start_y
+
+# Draw Slogan
+w_slogan = bbox_slogan[2] - bbox_slogan[0]
+draw.text(((WIDTH - w_slogan) // 2, current_y), SLOGAN, fill=TEXT_COLOR, font=font_slogan)
+current_y += h_slogan + gap_slogan_logo
+
+# Draw Logo
+logo_x = (WIDTH - logo_w) // 2
+img.paste(logo, (logo_x, current_y), logo)
+current_y += logo_h + gap_logo_join
+
+# Draw Join Us
+w_join = bbox_join[2] - bbox_join[0]
+draw.text(((WIDTH - w_join) // 2, current_y), JOIN_US_TEXT, fill=TEXT_COLOR, font=font_join)
+current_y += h_join + gap_join_tagline
+
+# Draw Tagline
+w_tagline = bbox_tagline[2] - bbox_tagline[0]
+draw.text(((WIDTH - w_tagline) // 2, current_y), TAGLINE, fill=TEXT_COLOR, font=font_tagline)
+current_y += h_tagline + gap_tagline_qr
+
+# Draw QR
+qr_bg_x = (WIDTH - qr_bg_size) // 2
 draw.rounded_rectangle(
-    [(qr_bg_x, qr_bg_y), (qr_bg_x + qr_bg_size, qr_bg_y + qr_bg_size)],
+    [(qr_bg_x, current_y), (qr_bg_x + qr_bg_size, current_y + qr_bg_size)],
     radius=15,
     fill=WHITE
 )
-
 qr_x = (WIDTH - qr_size) // 2
-qr_y = qr_bg_y + qr_bg_padding
+qr_y = current_y + qr_bg_padding
 img.paste(qr, (qr_x, qr_y), qr)
 
 # Save
