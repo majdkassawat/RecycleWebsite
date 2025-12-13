@@ -59,7 +59,7 @@ except:
 
 # 1. Logo (Aspect Ratio Preserved)
 logo = Image.open(logo_path).convert('RGBA')
-max_logo_size = 310 # Increased size for better fit
+max_logo_size = 340 # Increased size further
 w, h = logo.size
 aspect_ratio = w / h
 
@@ -74,7 +74,7 @@ logo = logo.resize((new_w, new_h), Image.LANCZOS)
 logo_w, logo_h = logo.size
 
 # 2. QR Code
-qr_size = 125 # Increased size
+qr_size = 140 # Increased size further
 qr = Image.open(qr_path).convert('RGBA')
 qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
 qr_bg_padding = 5
@@ -96,8 +96,8 @@ bbox_join = draw.textbbox((0, 0), JOIN_US_TEXT, font=font_join)
 h_join = bbox_join[3] - bbox_join[1]
 w_join = bbox_join[2] - bbox_join[0]
 
-gap_logo_join = 10
-gap_join_qr = 10
+gap_logo_join = 5 # Reduced gap
+gap_join_qr = 5 # Reduced gap
 
 total_content_height = logo_h + gap_logo_join + h_join + gap_join_qr + qr_bg_size
 

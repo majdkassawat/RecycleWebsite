@@ -121,31 +121,23 @@ def draw_text_on_arc(img, text, font, center, radius, start_angle, text_color, i
 
         # Create char image
         # Make it large enough
-        char_img_size = int(font.size * 2)
+        char_img_size = int(font.size * 3) # Increased buffer
         char_img = Image.new('RGBA', (char_img_size, char_img_size), (0,0,0,0))
         char_draw = ImageDraw.Draw(char_img)
         
-        # Draw char centered
-        # getbbox might be better to center exactly
-        bbox = font.getbbox(char)
-        cw = bbox[2] - bbox[0]
-        ch = bbox[3] - bbox[1]
-        # Offset to center
-        # We want the baseline to be at the center? Or the middle of the char?
-        # Usually baseline on the radius.
-        # If radius is the baseline, we draw text at (width/2, height/2 - ascent?)
-        # Let's just center it for now.
-        
-        char_draw.text(((char_img_size - cw)/2 - bbox[0], (char_img_size - ch)/2 - bbox[1]), char, font=font, fill=text_color)
+        # Draw char centered using anchor 'ms' (Middle Baseline)
+        # This ensures all characters share the same baseline, preventing vertical jitter.
+        # We place the baseline at the exact center of the image.
+        char_draw.text((char_img_size/2, char_img_size/2), char, font=font, fill=text_color, anchor='ms')
         
         # Rotate
         rotated_char = char_img.rotate(rotation, resample=Image.BICUBIC, expand=True)
         
         # Paste
         # (x,y) is the position on the circle.
-        # If we want the text ON the line, we should offset by half height?
-        # Or if radius is the baseline.
-        # Let's assume radius is the center of the text height for simplicity, or adjust radius.
+        # Since we drew the text with baseline at center of char_img,
+        # and (x,y) is the center of the rotated image,
+        # the baseline of the text will align with the circle of radius 'radius'.
         
         px = int(x - rotated_char.width / 2)
         py = int(y - rotated_char.height / 2)
