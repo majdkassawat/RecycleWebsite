@@ -9,6 +9,7 @@ sticker_ar_path = os.path.join(images_dir, 'tadweer_sticker_ar.png')
 output_path_mixed = os.path.join(images_dir, 'sticker_sheet_a4_mixed.png')
 output_path_en = os.path.join(images_dir, 'sticker_sheet_a4_en.png')
 output_path_ar = os.path.join(images_dir, 'sticker_sheet_a4_ar.png')
+output_path_variations = os.path.join(images_dir, 'sticker_sheet_a4_variations.png')
 
 # A4 Dimensions at 300 DPI
 A4_WIDTH = 2480
@@ -25,6 +26,17 @@ ROWS = 4
 # Load Stickers
 sticker_en = Image.open(sticker_en_path)
 sticker_ar = Image.open(sticker_ar_path)
+
+# Load Variations
+try:
+    sticker_sq_green = Image.open(os.path.join(images_dir, 'sticker_en_square_green.png'))
+    sticker_sq_white = Image.open(os.path.join(images_dir, 'sticker_en_square_white.png'))
+    sticker_ci_white = Image.open(os.path.join(images_dir, 'sticker_en_circle_white.png'))
+except FileNotFoundError:
+    print("Warning: Variation stickers not found. Run tools/generate_variations.py first.")
+    sticker_sq_green = sticker_en
+    sticker_sq_white = sticker_en
+    sticker_ci_white = sticker_en
 
 def create_sheet(mode='mixed'):
     # Create Canvas
@@ -54,6 +66,19 @@ def create_sheet(mode='mixed'):
                 sticker = sticker_en
             elif mode == 'ar':
                 sticker = sticker_ar
+            elif mode == 'variations':
+                # Row 0: Original Circle Green
+                # Row 1: Circle White
+                # Row 2: Square Green
+                # Row 3: Square White
+                if row == 0:
+                    sticker = sticker_en
+                elif row == 1:
+                    sticker = sticker_ci_white
+                elif row == 2:
+                    sticker = sticker_sq_green
+                else:
+                    sticker = sticker_sq_white
                 
             sheet.paste(sticker, (x, y), sticker)
             
@@ -73,3 +98,8 @@ print(f'Sticker sheet created: {output_path_en}')
 sheet_ar = create_sheet('ar')
 sheet_ar.save(output_path_ar, 'PNG', dpi=(300, 300))
 print(f'Sticker sheet created: {output_path_ar}')
+
+# Generate Variations
+sheet_vars = create_sheet('variations')
+sheet_vars.save(output_path_variations, 'PNG', dpi=(300, 300))
+print(f'Sticker sheet created: {output_path_variations}')
