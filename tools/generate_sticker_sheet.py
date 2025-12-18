@@ -38,10 +38,67 @@ except FileNotFoundError:
     sticker_sq_white = sticker_en
     sticker_ci_white = sticker_en
 
+# Load Small Stickers
+try:
+    sticker_small_cw = Image.open(os.path.join(images_dir, 'sticker_small_circle_white.png'))
+    sticker_small_cg = Image.open(os.path.join(images_dir, 'sticker_small_circle_green.png'))
+    sticker_small_sw = Image.open(os.path.join(images_dir, 'sticker_small_square_white.png'))
+    small_stickers = [sticker_small_cw, sticker_small_cg, sticker_small_sw]
+except FileNotFoundError:
+    print("Warning: Small stickers not found. Run tools/generate_small_stickers.py first.")
+    small_stickers = []
+
 def create_sheet(mode='mixed'):
     # Create Canvas
     sheet = Image.new('RGB', (A4_WIDTH, A4_HEIGHT), BG_COLOR)
     
+    if mode == 'mixed_sizes':
+        # Custom layout for Mixed Sizes (Small English + Large Arabic)
+        # Rows: Small, Small, Large(Ar), Small, Small, Large(Ar)
+        row_types = ['small', 'small', 'large_ar', 'small', 'small', 'large_ar']
+        
+        # Calculate Gaps
+        # Heights: Small=354, Large=709
+        # Total Content Height = (4 * 354) + (2 * 709) = 1416 + 1418 = 2834
+        # Remaining = 3508 - 2834 = 674
+        # Gaps = 7 (Top, Bottom, and 5 between rows)
+        v_gap = 674 // 7
+        
+        current_y = v_gap
+        
+        small_idx = 0
+        
+        for r_type in row_types:
+            if r_type == 'small':
+                # 6 Columns
+                # Width = 6 * 354 = 2124
+                # Remaining = 2480 - 2124 = 356
+                # Gaps = 7
+                h_gap = 356 // 7
+                
+                for c in range(6):
+                    x = h_gap + c * (354 + h_gap)
+                    sticker = small_stickers[small_idx % 3]
+                    sheet.paste(sticker, (x, current_y), sticker)
+                    small_idx += 1
+                
+                current_y += 354 + v_gap
+                
+            elif r_type == 'large_ar':
+                # 3 Columns
+                # Width = 3 * 709 = 2127
+                # Remaining = 2480 - 2127 = 353
+                # Gaps = 4
+                h_gap = 353 // 4
+                
+                for c in range(3):
+                    x = h_gap + c * (709 + h_gap)
+                    sheet.paste(sticker_ar, (x, current_y), sticker_ar)
+                    
+                current_y += 709 + v_gap
+                
+        return sheet
+
     # Calculate Spacing
     total_sticker_width = COLS * STICKER_SIZE
     remaining_width = A4_WIDTH - total_sticker_width
@@ -83,6 +140,13 @@ def create_sheet(mode='mixed'):
             sheet.paste(sticker, (x, y), sticker)
             
     return sheet
+
+# Generate Mixed Sizes
+if small_stickers:
+    output_path_mixed_sizes = os.path.join(images_dir, 'sticker_sheet_a4_mixed_sizes.png')
+    sheet_mixed_sizes = create_sheet('mixed_sizes')
+    sheet_mixed_sizes.save(output_path_mixed_sizes, 'PNG', dpi=(300, 300))
+    print(f'Sticker sheet created: {output_path_mixed_sizes}')
 
 # Generate Mixed
 sheet_mixed = create_sheet('mixed')
