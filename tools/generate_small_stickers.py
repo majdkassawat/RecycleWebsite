@@ -61,10 +61,11 @@ def generate_small_circle_white():
     
     # Logo
     # Maximize logo size, leaving room for text at bottom
-    logo_size = 300 # Increased from 200
+    # Reduced to 230 to fit inside circle without clipping corners
+    logo_size = 230 
     logo = logo_orig.resize((logo_size, int(logo_size * logo_orig.height / logo_orig.width)), Image.LANCZOS)
-    # Center horizontally, push up slightly
-    img.paste(logo, ((WIDTH - logo.width) // 2, 15), logo)
+    # Center horizontally, push up slightly (y=50)
+    img.paste(logo, ((WIDTH - logo.width) // 2, 50), logo)
     
     # Curved URL at bottom
     text_radius = circle_radius - 15
@@ -89,9 +90,9 @@ def generate_small_circle_green():
     )
     
     # Logo
-    logo_size = 300 # Increased from 200
+    logo_size = 230
     logo = logo_orig.resize((logo_size, int(logo_size * logo_orig.height / logo_orig.width)), Image.LANCZOS)
-    img.paste(logo, ((WIDTH - logo.width) // 2, 15), logo)
+    img.paste(logo, ((WIDTH - logo.width) // 2, 50), logo)
     
     # Curved URL at bottom (Dark Green Text for contrast on Light Green BG)
     text_radius = circle_radius - 15
@@ -108,9 +109,9 @@ def generate_small_square_white():
     draw.rectangle([0, 0, WIDTH-1, HEIGHT-1], outline=BG_GREEN, width=10)
     
     # Logo
-    logo_size = 300 # Increased from 220
+    logo_size = 280 # Reduced slightly to avoid touching text
     logo = logo_orig.resize((logo_size, int(logo_size * logo_orig.height / logo_orig.width)), Image.LANCZOS)
-    img.paste(logo, ((WIDTH - logo.width) // 2, 10), logo)
+    img.paste(logo, ((WIDTH - logo.width) // 2, 20), logo)
     
     # URL at bottom
     bbox = draw.textbbox((0, 0), WEBSITE_URL, font=fonts['url_straight'])
