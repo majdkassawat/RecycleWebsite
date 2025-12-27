@@ -59,7 +59,7 @@ try:
     # Adjusted sizes for 709px (6cm)
     font_join = ImageFont.truetype("arialbd.ttf", 35)
     font_slogan = ImageFont.truetype("arialbd.ttf", 35)
-    font_tagline = ImageFont.truetype("arial.ttf", 25)
+    font_tagline = ImageFont.truetype("arial.ttf", 35) # Increased from 25
 except:
     # Fallback
     font_join = ImageFont.load_default()
@@ -96,13 +96,14 @@ qr_bg_size = qr_size + (qr_bg_padding * 2)
 
 # Draw Curved Text
 # Radius for text: slightly less than circle radius
-text_radius = circle_radius - 30 # Move text outwards to create more space
+text_radius_top = circle_radius - 55 # Move top text lower (inwards)
+text_radius_bottom = circle_radius - 35
 
 # Top: Slogan
-draw_text_on_arc(img, SLOGAN, font_slogan, center, text_radius, 270, TEXT_COLOR, is_bottom=False)
+draw_text_on_arc(img, SLOGAN, font_slogan, center, text_radius_top, 270, TEXT_COLOR, is_bottom=False)
 
 # Bottom: Tagline
-draw_text_on_arc(img, TAGLINE, font_tagline, center, text_radius, 90, TEXT_COLOR, is_bottom=True)
+draw_text_on_arc(img, TAGLINE, font_tagline, center, text_radius_bottom, 90, TEXT_COLOR, is_bottom=True)
 
 # Calculate Vertical Layout for Center Content
 # Stack: Logo -> Gap -> Join Us -> Gap -> QR
