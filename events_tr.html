@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tadweer Tech - Etkinlikler</title>
+    <link rel="icon" href="images/logo_circular.png" type="image/png">
+    <meta name="description" content="Tadweer Tech'in nerede olduğunu görün. En son etkinliklerimizi ve topluluk katılımı anlarımızı keşfedin.">
+    <meta property="og:title" content="Tadweer Tech - Etkinlikler">
+    <meta property="og:image" content="https://tadweer-tech-sy.org/images/logo_circular.png">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="images/logo_circular.png" alt="Tadweer Tech Logosu">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index_tr.html">Ana Sayfa</a></li>
+                <li><a href="index_tr.html#about">Hakkımızda</a></li>
+                <li><a href="index_tr.html#mission">Misyon & Vizyon</a></li>
+                <li><a href="index_tr.html#conduct">Davranış Kuralları</a></li>
+                <li><a href="index_tr.html#volunteer">Gönüllü Ol</a></li>
+                <li><a href="#events">Etkinlikler</a></li>
+                <li><a href="index_tr.html#contact">İletişim</a></li>
+                <li class="lang-switch">
+                    <a href="events.html">EN</a> | <a href="events_ar.html">AR</a> | <a href="events_es.html">ES</a> | <a href="events_de.html">DE</a> | <a href="events_tr.html" class="active">TR</a>
+                </li>
+            </ul>
+            <div class="burger">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </nav>
+    </header>
+
+    <section id="event-slides" class="content-section alt-bg" style="padding-top: 120px;">
+        <div class="container" data-aos="fade-up">
+            <h2>Etkinlik Öne Çıkanlar</h2>
+            <p class="lead-text">Son zamanlarda neler yaptığımıza bir göz atın.</p>
+
+            <div class="events-slider">
+                <div class="slides">
+                    <div class="slide active">
+                        <img src="images/605738327_122145588638933241_3389410552555223736_n.jpg" alt="Tadweer Tech standı ve ekibinin etkinlik fotoğrafı">
+                        <div class="slide-caption">Tadweer Tech standında yerinde eğitim.</div>
+                    </div>
+                    <div class="slide">
+                        <img src="images/605632517_122145589040933241_6745375810082270375_n.jpg" alt="Ziyaretçilerin Tadweer Tech ile etkileşimde bulunduğu etkinlik fotoğrafı">
+                        <div class="slide-caption">Ziyaretçilerle buluşma ve geri dönüşüm misyonumuzu paylaşma.</div>
+                    </div>
+                </div>
+
+                <div class="slider-controls">
+                    <button id="prevSlide" aria-label="Önceki etkinlik"><i class="fas fa-chevron-left"></i></button>
+                    <div class="dots">
+                        <button class="dot active" data-slide="0" aria-label="İlk etkinliği göster"></button>
+                        <button class="dot" data-slide="1" aria-label="İkinci etkinliği göster"></button>
+                    </div>
+                    <button id="nextSlide" aria-label="Sonraki etkinlik"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Tadweer Tech. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <button id="backToTop" title="Yukarı"><i class="fas fa-arrow-up"></i></button>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
