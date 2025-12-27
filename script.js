@@ -72,3 +72,38 @@ function highlightNav() {
         }
     });
 }
+
+// Simple slider for Events page
+(function initEventsSlider() {
+    const slider = document.querySelector(".events-slider");
+    if (!slider) return;
+
+    const slides = Array.from(slider.querySelectorAll(".slide"));
+    const dots = Array.from(slider.querySelectorAll(".dot"));
+    const prev = document.getElementById("prevSlide");
+    const next = document.getElementById("nextSlide");
+    let currentIndex = slides.findIndex((slide) => slide.classList.contains("active"));
+    let timer;
+
+    if (currentIndex === -1) currentIndex = 0;
+
+    const showSlide = (index) => {
+        if (!slides.length) return;
+        const newIndex = (index + slides.length) % slides.length;
+        slides.forEach((slide, idx) => slide.classList.toggle("active", idx === newIndex));
+        dots.forEach((dot, idx) => dot.classList.toggle("active", idx === newIndex));
+        currentIndex = newIndex;
+        resetTimer();
+    };
+
+    const resetTimer = () => {
+        if (timer) clearInterval(timer);
+        timer = setInterval(() => showSlide(currentIndex + 1), 7000);
+    };
+
+    prev?.addEventListener("click", () => showSlide(currentIndex - 1));
+    next?.addEventListener("click", () => showSlide(currentIndex + 1));
+    dots.forEach((dot, idx) => dot.addEventListener("click", () => showSlide(idx)));
+
+    showSlide(currentIndex);
+})();
