@@ -190,9 +190,12 @@
             align-items: center;
             justify-content: flex-start;
             text-align: left;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            background: 
+                radial-gradient(circle at 100% 100%, rgba(46, 125, 50, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 0% 0%, rgba(129, 199, 132, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #ffffff 0%, #f5f9f5 50%, #fafafa 100%);
             position: relative;
-            gap: 15px;
+            gap: 18px;
         }
 
         .badge::before {
@@ -206,15 +209,28 @@
             border-radius: 10px 10px 0 0;
         }
 
+        .badge::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
+            background: url('images/logo_circular.png') no-repeat center;
+            background-size: contain;
+            opacity: 0.1;
+        }
+
         .badge-logo {
-            width: 60px;
-            height: 60px;
-            min-width: 60px;
+            width: 70px;
+            height: 70px;
+            min-width: 70px;
             border-radius: 50%;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
             object-fit: contain;
             background: white;
-            padding: 2px;
+            padding: 3px;
+            border: 2px solid var(--accent-color);
         }
 
         .badge-info {
