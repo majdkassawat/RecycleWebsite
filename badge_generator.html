@@ -186,13 +186,14 @@
             border-radius: 8px;
             padding: 8mm;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
-            text-align: center;
+            justify-content: flex-start;
+            text-align: left;
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             position: relative;
             overflow: hidden;
+            gap: 12px;
         }
 
         .badge::before {
@@ -206,11 +207,17 @@
         }
 
         .badge-logo {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
+            min-width: 55px;
             border-radius: 50%;
-            margin-bottom: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .badge-org {
@@ -219,14 +226,14 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .badge-name {
             font-size: 16px;
             font-weight: bold;
             color: var(--text-color);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .badge-title {
@@ -239,13 +246,6 @@
             font-size: 10px;
             color: var(--secondary-color);
             font-weight: 500;
-        }
-
-        .badge-qr {
-            width: 40px;
-            height: 40px;
-            margin-top: 8px;
-            opacity: 0.8;
         }
 
         /* Print Styles */
@@ -386,17 +386,20 @@
                 if (name.trim()) {
                     badge.innerHTML = `
                         <img src="images/logo_circular.png" alt="Logo" class="badge-logo">
-                        <div class="badge-org">Tadweer Tech</div>
-                        <div class="badge-name">${escapeHtml(name)}</div>
-                        <div class="badge-title">${escapeHtml(title)}</div>
-                        <div class="badge-dept">${escapeHtml(dept)}</div>
-                        <img src="images/qr_website.png" alt="QR" class="badge-qr">
+                        <div class="badge-info">
+                            <div class="badge-org">Tadweer Tech</div>
+                            <div class="badge-name">${escapeHtml(name)}</div>
+                            <div class="badge-title">${escapeHtml(title)}</div>
+                            <div class="badge-dept">${escapeHtml(dept)}</div>
+                        </div>
                     `;
                 } else {
                     badge.innerHTML = `
                         <img src="images/logo_circular.png" alt="Logo" class="badge-logo" style="opacity: 0.3;">
-                        <div class="badge-org" style="opacity: 0.3;">Tadweer Tech</div>
-                        <div class="badge-name" style="color: #ccc; font-style: italic;">Empty Badge</div>
+                        <div class="badge-info">
+                            <div class="badge-org" style="opacity: 0.3;">Tadweer Tech</div>
+                            <div class="badge-name" style="color: #ccc; font-style: italic;">Empty Badge</div>
+                        </div>
                     `;
                 }
 
