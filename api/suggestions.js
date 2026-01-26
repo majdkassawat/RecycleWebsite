@@ -1,220 +1,139 @@
 // Vercel Serverless Function for Suggestions
-// Uses Vercel KV (Redis) for storage
+// Simple in-memory storage (will persist across warm invocations)
 
-const SUGGESTIONS_KEY = 'tadweer:suggestions';
+const ADMIN_KEY = process.env.ADMIN_KEY || 'tadweer-admin-2025';
 
-export const config = {
-  runtime: 'edge',
-};
+// In-memory storage - for persistent storage, add Vercel KV later
+let suggestions = [];
 
 // Generate tracking ID
 function generateTrackingId() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let id = 'TDW-';
-  for (let i = 0; i < 6; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return id;
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let id = 'TDW-';
+    for (let i = 0; i < 6; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
 }
 
-// Simple in-memory fallback (for when KV is not configured)
-// In production, this will be replaced by Vercel KV
-let memoryStore = [];
+// Generate UUID
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
-export default async function handler(request) {
-  const url = new URL(request.url);
-  const method = request.method;
+module.exports = async function handler(req, res) {
+    // CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // CORS headers
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-
-  // Handle preflight
-  if (method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  try {
-    // Try to use Vercel KV if available
-    let kv = null;
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-      const { kv: kvClient } = await import('@vercel/kv');
-      kv = kvClient;
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
     }
 
-    // GET - List all suggestions or get by tracking_id
-    if (method === 'GET') {
-      const trackingId = url.searchParams.get('tracking_id');
-      
-      let suggestions = [];
-      if (kv) {
-        suggestions = await kv.get(SUGGESTIONS_KEY) || [];
-      } else {
-        suggestions = memoryStore;
-      }
+    try {
+        // GET - List all suggestions or get by tracking_id
+        if (req.method === 'GET') {
+            const trackingId = req.query.tracking_id;
+            
+            if (trackingId) {
+                const found = suggestions.find(s => s.tracking_id === trackingId.toUpperCase());
+                if (found) {
+                    // Return limited info for public tracking
+                    return res.status(200).json([{
+                        tracking_id: found.tracking_id,
+                        category: found.category,
+                        status: found.status,
+                        created_at: found.created_at
+                    }]);
+                }
+                return res.status(200).json([]);
+            }
 
-      if (trackingId) {
-        const found = suggestions.find(s => s.tracking_id === trackingId.toUpperCase());
-        if (found) {
-          // Return limited info for public tracking
-          return new Response(JSON.stringify([{
-            tracking_id: found.tracking_id,
-            category: found.category,
-            status: found.status,
-            created_at: found.created_at
-          }]), {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
+            // Check for admin auth for full list
+            const authHeader = req.headers.authorization;
+            
+            if (authHeader !== `Bearer ${ADMIN_KEY}`) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            return res.status(200).json(suggestions);
         }
-        return new Response(JSON.stringify([]), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
 
-      // Check for admin auth for full list
-      const authHeader = request.headers.get('Authorization');
-      const adminKey = process.env.ADMIN_KEY || 'tadweer-admin-2025';
-      
-      if (authHeader !== `Bearer ${adminKey}`) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
+        // POST - Create new suggestion
+        if (req.method === 'POST') {
+            const body = req.body;
+            
+            // Validate
+            if (!body.suggestion || body.suggestion.length < 10) {
+                return res.status(400).json({ error: 'Suggestion too short' });
+            }
 
-      return new Response(JSON.stringify(suggestions), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+            if (body.suggestion.length > 2000) {
+                return res.status(400).json({ error: 'Suggestion too long' });
+            }
+
+            // Honeypot check
+            if (body.website_url) {
+                return res.status(400).json({ error: 'Invalid submission' });
+            }
+
+            const trackingId = generateTrackingId();
+            const newSuggestion = {
+                id: generateUUID(),
+                tracking_id: trackingId,
+                name: body.name || 'Anonymous',
+                email: body.email || '',
+                category: body.category || 'general',
+                suggestion: body.suggestion,
+                status: 'new',
+                page_url: body.page_url || '',
+                created_at: new Date().toISOString()
+            };
+
+            suggestions.unshift(newSuggestion);
+
+            return res.status(201).json({ 
+                success: true, 
+                tracking_id: trackingId 
+            });
+        }
+
+        // PATCH - Update suggestion status (admin only)
+        if (req.method === 'PATCH') {
+            const authHeader = req.headers.authorization;
+            
+            if (authHeader !== `Bearer ${ADMIN_KEY}`) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            const body = req.body;
+            const { id, status } = body;
+
+            if (!id || !status) {
+                return res.status(400).json({ error: 'Missing id or status' });
+            }
+
+            const index = suggestions.findIndex(s => s.id === id);
+            if (index === -1) {
+                return res.status(404).json({ error: 'Suggestion not found' });
+            }
+
+            suggestions[index].status = status;
+            suggestions[index].updated_at = new Date().toISOString();
+
+            return res.status(200).json({ success: true });
+        }
+
+        return res.status(405).json({ error: 'Method not allowed' });
+
+    } catch (error) {
+        console.error('API Error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
-
-    // POST - Create new suggestion
-    if (method === 'POST') {
-      const body = await request.json();
-      
-      // Validate
-      if (!body.suggestion || body.suggestion.length < 10) {
-        return new Response(JSON.stringify({ error: 'Suggestion too short' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      if (body.suggestion.length > 2000) {
-        return new Response(JSON.stringify({ error: 'Suggestion too long' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Honeypot check
-      if (body.website_url) {
-        return new Response(JSON.stringify({ error: 'Invalid submission' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const trackingId = generateTrackingId();
-      const newSuggestion = {
-        id: crypto.randomUUID(),
-        tracking_id: trackingId,
-        name: body.name || 'Anonymous',
-        email: body.email || '',
-        category: body.category || 'general',
-        suggestion: body.suggestion,
-        status: 'new',
-        page_url: body.page_url || '',
-        created_at: new Date().toISOString()
-      };
-
-      // Save
-      let suggestions = [];
-      if (kv) {
-        suggestions = await kv.get(SUGGESTIONS_KEY) || [];
-        suggestions.unshift(newSuggestion);
-        await kv.set(SUGGESTIONS_KEY, suggestions);
-      } else {
-        memoryStore.unshift(newSuggestion);
-        suggestions = memoryStore;
-      }
-
-      return new Response(JSON.stringify({ 
-        success: true, 
-        tracking_id: trackingId 
-      }), {
-        status: 201,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // PATCH - Update suggestion status (admin only)
-    if (method === 'PATCH') {
-      const authHeader = request.headers.get('Authorization');
-      const adminKey = process.env.ADMIN_KEY || 'tadweer-admin-2025';
-      
-      if (authHeader !== `Bearer ${adminKey}`) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const body = await request.json();
-      const { id, status } = body;
-
-      if (!id || !status) {
-        return new Response(JSON.stringify({ error: 'Missing id or status' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      let suggestions = [];
-      if (kv) {
-        suggestions = await kv.get(SUGGESTIONS_KEY) || [];
-      } else {
-        suggestions = memoryStore;
-      }
-
-      const index = suggestions.findIndex(s => s.id === id);
-      if (index === -1) {
-        return new Response(JSON.stringify({ error: 'Suggestion not found' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      suggestions[index].status = status;
-      suggestions[index].updated_at = new Date().toISOString();
-
-      if (kv) {
-        await kv.set(SUGGESTIONS_KEY, suggestions);
-      } else {
-        memoryStore = suggestions;
-      }
-
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-
-  } catch (error) {
-    console.error('API Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
-}
+};
