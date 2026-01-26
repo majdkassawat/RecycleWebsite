@@ -44,44 +44,34 @@ jobs:
     steps:
       - name: Test API Connectivity
         run: |
-          echo "🔍 Testing Kaiten API..."
+          echo "🔍 Testing Kaiten API at aldureid.kaiten.ru..."
           API_KEY="${{ secrets.KAITEN_API_KEY }}"
+          BASE_URL="https://aldureid.kaiten.ru/api/latest"
           
-          # Test app.kaiten.ru with full response
-          echo ">>> Full response from app.kaiten.ru:"
-          curl -s --max-time 10 \
+          echo ">>> Testing /users/current:"
+          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
             -H "Authorization: Bearer $API_KEY" \
-            -H "Content-Type: application/json" \
-            "https://app.kaiten.ru/api/latest/users/current" 2>&1
-          
-          echo ""
-          echo ">>> Trying /api/v1/ instead of /api/latest/:"
-          curl -s --max-time 10 \
-            -H "Authorization: Bearer $API_KEY" \
-            "https://app.kaiten.ru/api/v1/users/current" 2>&1
+            "$BASE_URL/users/current" 2>&1
           
           echo ""
-          echo ">>> Trying spaces endpoint (common first call):"
-          curl -s --max-time 10 \
+          echo ">>> Testing /spaces:"
+          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
             -H "Authorization: Bearer $API_KEY" \
-            "https://app.kaiten.ru/api/latest/spaces" 2>&1
+            "$BASE_URL/spaces" 2>&1
+          
+          echo ""
+          echo ">>> Testing space 710660 boards:"
+          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
+            -H "Authorization: Bearer $API_KEY" \
+            "$BASE_URL/spaces/710660/boards" 2>&1
 
       - name: List Boards
         if: ${{ github.event.inputs.action == 'list-boards' }}
         run: |
-          echo "📋 Fetching all boards..."
-          for base in "https://kaiten.io/api/latest" "https://app.kaiten.io/api/latest" "https://kaiten.ru/api/latest"; do
-            echo "Trying $base..."
-            response=$(curl -s --max-time 15 -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
-              "$base/boards" 2>&1)
-            if echo "$response" | jq -e '.' > /dev/null 2>&1; then
-              echo "✅ Success with $base"
-              echo "$response" | jq -r '.[] | "ID: \(.id) | Name: \(.title)"' || echo "$response"
-              exit 0
-            fi
-          done
-          echo "❌ All endpoints failed"
-          exit 1
+          echo "📋 Fetching boards from space 710660..."
+          response=$(curl -s --max-time 15 -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            "https://aldureid.kaiten.ru/api/latest/spaces/710660/boards" 2>&1)
+          echo "$response" | jq -r '.[] | "ID: \(.id) | Name: \(.title)"' 2>/dev/null || echo "$response"
 
       - name: List Cards on Board
         if: ${{ github.event.inputs.action == 'list-cards' }}
