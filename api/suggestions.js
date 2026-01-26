@@ -1,10 +1,12 @@
 // Vercel Serverless Function for Suggestions
-// Simple in-memory storage (will persist across warm invocations)
+// Uses Vercel KV (Redis) for persistent storage when available
+// Falls back to in-memory storage for testing
 
 const ADMIN_KEY = process.env.ADMIN_KEY || 'tadweer-admin-2025';
+const KV_KEY = 'tadweer:suggestions';
 
-// In-memory storage - for persistent storage, add Vercel KV later
-let suggestions = [];
+// In-memory fallback (resets on cold start)
+let memoryStore = [];
 
 // Generate tracking ID
 function generateTrackingId() {
@@ -25,6 +27,38 @@ function generateUUID() {
     });
 }
 
+// Storage abstraction
+async function getStorage() {
+    // Try Vercel KV if environment variables are set
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        try {
+            const { kv } = require('@vercel/kv');
+            return {
+                async get() {
+                    return await kv.get(KV_KEY) || [];
+                },
+                async set(data) {
+                    await kv.set(KV_KEY, data);
+                },
+                type: 'kv'
+            };
+        } catch (e) {
+            console.log('KV not available, using memory');
+        }
+    }
+    
+    // Fallback to memory
+    return {
+        async get() {
+            return memoryStore;
+        },
+        async set(data) {
+            memoryStore = data;
+        },
+        type: 'memory'
+    };
+}
+
 module.exports = async function handler(req, res) {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,10 +70,13 @@ module.exports = async function handler(req, res) {
         return res.status(204).end();
     }
 
+    const storage = await getStorage();
+
     try {
         // GET - List all suggestions or get by tracking_id
         if (req.method === 'GET') {
             const trackingId = req.query.tracking_id;
+            const suggestions = await storage.get();
             
             if (trackingId) {
                 const found = suggestions.find(s => s.tracking_id === trackingId.toUpperCase());
@@ -96,11 +133,14 @@ module.exports = async function handler(req, res) {
                 created_at: new Date().toISOString()
             };
 
+            const suggestions = await storage.get();
             suggestions.unshift(newSuggestion);
+            await storage.set(suggestions);
 
             return res.status(201).json({ 
                 success: true, 
-                tracking_id: trackingId 
+                tracking_id: trackingId,
+                storage: storage.type
             });
         }
 
@@ -119,13 +159,16 @@ module.exports = async function handler(req, res) {
                 return res.status(400).json({ error: 'Missing id or status' });
             }
 
+            const suggestions = await storage.get();
             const index = suggestions.findIndex(s => s.id === id);
+            
             if (index === -1) {
                 return res.status(404).json({ error: 'Suggestion not found' });
             }
 
             suggestions[index].status = status;
             suggestions[index].updated_at = new Date().toISOString();
+            await storage.set(suggestions);
 
             return res.status(200).json({ success: true });
         }
@@ -134,6 +177,6 @@ module.exports = async function handler(req, res) {
 
     } catch (error) {
         console.error('API Error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 };
