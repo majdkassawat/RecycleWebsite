@@ -239,6 +239,85 @@
         </div>
     </footer>
 
+    <!-- Feedback Widget -->
+    <button id="feedbackBubble" class="feedback-bubble" title="Comparte tu opinión">
+        <i class="fas fa-lightbulb"></i>
+        <span class="bubble-tooltip">¡Comparte una idea!</span>
+    </button>
+
+    <div id="feedbackModal" class="feedback-modal">
+        <div class="feedback-dialog">
+            <div class="feedback-header">
+                <h3><i class="fas fa-lightbulb"></i> Comparte tus Ideas</h3>
+                <button id="feedbackClose" class="feedback-close">&times;</button>
+            </div>
+            <div class="feedback-body">
+                <div class="feedback-tabs">
+                    <button class="feedback-tab active" data-tab="submit">Enviar Sugerencia</button>
+                    <button class="feedback-tab" data-tab="track">Seguir Estado</button>
+                </div>
+
+                <!-- Submit Form -->
+                <div id="feedbackFormView">
+                    <form id="feedbackForm">
+                        <div class="feedback-form-group">
+                            <label for="feedbackName">Nombre (opcional)</label>
+                            <input type="text" id="feedbackName" name="name" placeholder="Tu nombre">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackEmail">Email (opcional)</label>
+                            <input type="email" id="feedbackEmail" name="email" placeholder="Para actualizaciones sobre tu sugerencia">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackCategory">Categoría</label>
+                            <select id="feedbackCategory" name="category" required>
+                                <option value="website">Mejora del Sitio Web</option>
+                                <option value="activity">Idea de Actividad</option>
+                                <option value="general">Sugerencia General</option>
+                                <option value="partnership">Oportunidad de Colaboración</option>
+                            </select>
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackSuggestion">Tu Sugerencia *</label>
+                            <textarea id="feedbackSuggestion" name="suggestion" required minlength="10" maxlength="2000" placeholder="Comparte tu idea, opinión o sugerencia..."></textarea>
+                            <small><span id="charCount">0</span>/2000 caracteres</small>
+                        </div>
+                        <input type="text" id="feedbackHp" name="website_url" class="feedback-hp" tabindex="-1" autocomplete="off">
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-paper-plane"></i> Enviar Sugerencia
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Track Form -->
+                <div id="feedbackTrackView" class="feedback-hidden">
+                    <form id="trackForm">
+                        <div class="feedback-form-group">
+                            <label for="trackingIdInput">ID de Seguimiento</label>
+                            <input type="text" id="trackingIdInput" placeholder="ej. TDW-ABC123" required>
+                        </div>
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-search"></i> Verificar Estado
+                        </button>
+                    </form>
+                    <div id="trackResult" class="feedback-hidden">
+                        <div id="trackResultContent" class="feedback-track-result"></div>
+                    </div>
+                </div>
+
+                <!-- Success View -->
+                <div id="feedbackSuccess" class="feedback-success feedback-hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>¡Gracias!</h4>
+                    <p>Tu sugerencia ha sido recibida.</p>
+                    <p>Tu ID de seguimiento:</p>
+                    <div id="trackingIdDisplay" class="tracking-id-display"></div>
+                    <p><small>Guarda este ID para verificar el estado más tarde.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <button id="backToTop" title="Ir arriba"><i class="fas fa-arrow-up"></i></button>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>

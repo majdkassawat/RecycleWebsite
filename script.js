@@ -107,3 +107,177 @@ function highlightNav() {
 
     showSlide(currentIndex);
 })();
+
+// ===== FEEDBACK WIDGET =====
+(function initFeedbackWidget() {
+    const bubble = document.getElementById('feedbackBubble');
+    const modal = document.getElementById('feedbackModal');
+    const closeBtn = document.getElementById('feedbackClose');
+    const form = document.getElementById('feedbackForm');
+    const tabs = document.querySelectorAll('.feedback-tab');
+    const formView = document.getElementById('feedbackFormView');
+    const trackView = document.getElementById('feedbackTrackView');
+    const successView = document.getElementById('feedbackSuccess');
+    const trackForm = document.getElementById('trackForm');
+    const trackResult = document.getElementById('trackResult');
+    const charCount = document.getElementById('charCount');
+    const suggestionInput = document.getElementById('feedbackSuggestion');
+    
+    if (!bubble || !modal) return;
+
+    // Toggle modal
+    bubble.addEventListener('click', () => {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    closeBtn?.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    // Tab switching
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            const view = tab.dataset.tab;
+            formView?.classList.toggle('feedback-hidden', view !== 'submit');
+            trackView?.classList.toggle('feedback-hidden', view !== 'track');
+            successView?.classList.add('feedback-hidden');
+            trackResult?.classList.add('feedback-hidden');
+        });
+    });
+
+    // Character counter
+    suggestionInput?.addEventListener('input', () => {
+        if (charCount) {
+            charCount.textContent = suggestionInput.value.length;
+        }
+    });
+
+    // Generate tracking ID
+    const generateTrackingId = () => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let id = 'TDW-';
+        for (let i = 0; i < 6; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+    };
+
+    // Submit feedback - stores locally and opens email
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Honeypot check - if filled, it's a bot
+        const hp = document.getElementById('feedbackHp');
+        if (hp && hp.value) {
+            console.log('Bot detected');
+            return;
+        }
+
+        const submitBtn = form.querySelector('.feedback-submit');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        const formData = new FormData(form);
+        const trackingId = generateTrackingId();
+        
+        const data = {
+            id: trackingId,
+            name: formData.get('name') || 'Anonymous',
+            email: formData.get('email') || '',
+            category: formData.get('category'),
+            suggestion: formData.get('suggestion'),
+            date: new Date().toLocaleDateString(),
+            status: 'Submitted'
+        };
+
+        // Store in localStorage for tracking
+        const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
+        stored.push(data);
+        localStorage.setItem('tadweer_feedback', JSON.stringify(stored.slice(-20)));
+
+        // Build email body
+        const emailSubject = encodeURIComponent(`[${data.category}] Website Suggestion - ${trackingId}`);
+        const emailBody = encodeURIComponent(
+            `Tracking ID: ${trackingId}\n` +
+            `Category: ${data.category}\n` +
+            `From: ${data.name}${data.email ? ' (' + data.email + ')' : ''}\n` +
+            `Date: ${new Date().toISOString()}\n` +
+            `Page: ${window.location.href}\n\n` +
+            `--- Suggestion ---\n\n` +
+            `${data.suggestion}\n\n` +
+            `--- End ---`
+        );
+
+        // Open email client (mailto)
+        const mailtoLink = `mailto:tadweer.sy@gmail.com?subject=${emailSubject}&body=${emailBody}`;
+        
+        // Small delay for UX
+        await new Promise(r => setTimeout(r, 500));
+        
+        // Show success message
+        document.getElementById('trackingIdDisplay').textContent = trackingId;
+        formView.classList.add('feedback-hidden');
+        successView.classList.remove('feedback-hidden');
+        
+        // Open email client
+        window.location.href = mailtoLink;
+        
+        // Reset form
+        form.reset();
+        if (charCount) charCount.textContent = '0';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+
+    // Track existing feedback
+    trackForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const trackId = document.getElementById('trackingIdInput').value.trim().toUpperCase();
+        
+        if (!trackId) return;
+
+        // Check local storage
+        const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
+        const found = stored.find(f => f.id === trackId);
+
+        const resultContent = document.getElementById('trackResultContent');
+        if (found) {
+            resultContent.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <h4>Suggestion Found</h4>
+                <p><strong>ID:</strong> ${found.id}</p>
+                <p><strong>Category:</strong> ${found.category}</p>
+                <p><strong>Submitted:</strong> ${found.date}</p>
+                <p><strong>Status:</strong> ${found.status}</p>
+                <p><small>Preview: "${found.suggestion.substring(0, 80)}..."</small></p>
+            `;
+        } else {
+            resultContent.innerHTML = `
+                <i class="fas fa-search" style="color: #888;"></i>
+                <h4>Not Found</h4>
+                <p>No suggestion found with ID: ${trackId}</p>
+                <p><small>Note: Only suggestions submitted from this browser can be tracked.</small></p>
+            `;
+        }
+        trackResult.classList.remove('feedback-hidden');
+    });
+})();
+

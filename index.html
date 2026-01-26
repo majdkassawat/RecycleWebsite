@@ -239,6 +239,86 @@
         </div>
     </footer>
 
+    <!-- Feedback Widget -->
+    <button id="feedbackBubble" class="feedback-bubble" title="Share your feedback">
+        <i class="fas fa-lightbulb"></i>
+        <span class="bubble-tooltip">Share an idea!</span>
+    </button>
+
+    <div id="feedbackModal" class="feedback-modal">
+        <div class="feedback-dialog">
+            <div class="feedback-header">
+                <h3><i class="fas fa-lightbulb"></i> Share Your Ideas</h3>
+                <button id="feedbackClose" class="feedback-close">&times;</button>
+            </div>
+            <div class="feedback-body">
+                <div class="feedback-tabs">
+                    <button class="feedback-tab active" data-tab="submit">Submit Suggestion</button>
+                    <button class="feedback-tab" data-tab="track">Track Status</button>
+                </div>
+
+                <!-- Submit Form -->
+                <div id="feedbackFormView">
+                    <form id="feedbackForm">
+                        <div class="feedback-form-group">
+                            <label for="feedbackName">Name (optional)</label>
+                            <input type="text" id="feedbackName" name="name" placeholder="Your name">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackEmail">Email (optional)</label>
+                            <input type="email" id="feedbackEmail" name="email" placeholder="For updates on your suggestion">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackCategory">Category</label>
+                            <select id="feedbackCategory" name="category" required>
+                                <option value="website">Website Improvement</option>
+                                <option value="activity">Activity Idea</option>
+                                <option value="general">General Suggestion</option>
+                                <option value="partnership">Partnership Opportunity</option>
+                            </select>
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackSuggestion">Your Suggestion *</label>
+                            <textarea id="feedbackSuggestion" name="suggestion" required minlength="10" maxlength="2000" placeholder="Share your idea, feedback, or suggestion..."></textarea>
+                            <small><span id="charCount">0</span>/2000 characters</small>
+                        </div>
+                        <!-- Honeypot field for bots -->
+                        <input type="text" id="feedbackHp" name="website_url" class="feedback-hp" tabindex="-1" autocomplete="off">
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-paper-plane"></i> Submit Suggestion
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Track Form -->
+                <div id="feedbackTrackView" class="feedback-hidden">
+                    <form id="trackForm">
+                        <div class="feedback-form-group">
+                            <label for="trackingIdInput">Tracking ID</label>
+                            <input type="text" id="trackingIdInput" placeholder="e.g., TDW-ABC123" required>
+                        </div>
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-search"></i> Check Status
+                        </button>
+                    </form>
+                    <div id="trackResult" class="feedback-hidden">
+                        <div id="trackResultContent" class="feedback-track-result"></div>
+                    </div>
+                </div>
+
+                <!-- Success View -->
+                <div id="feedbackSuccess" class="feedback-success feedback-hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Thank You!</h4>
+                    <p>Your suggestion has been received.</p>
+                    <p>Your tracking ID:</p>
+                    <div id="trackingIdDisplay" class="tracking-id-display"></div>
+                    <p><small>Save this ID to check the status of your suggestion later.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <button id="backToTop" title="Go to top"><i class="fas fa-arrow-up"></i></button>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>

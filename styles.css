@@ -744,3 +744,281 @@ footer {
 [dir="rtl"] .team-card p {
     text-align: right;
 }
+
+/* ===== FEEDBACK WIDGET ===== */
+.feedback-bubble {
+    position: fixed;
+    bottom: 90px;
+    right: 30px;
+    z-index: 1000;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-bubble:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.feedback-bubble i {
+    color: white;
+    font-size: 24px;
+}
+
+.feedback-bubble .bubble-tooltip {
+    position: absolute;
+    right: 70px;
+    background: var(--text-color);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.feedback-bubble:hover .bubble-tooltip {
+    opacity: 1;
+}
+
+[dir="rtl"] .feedback-bubble {
+    right: auto;
+    left: 30px;
+}
+
+[dir="rtl"] .feedback-bubble .bubble-tooltip {
+    right: auto;
+    left: 70px;
+}
+
+/* Feedback Modal */
+.feedback-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.feedback-modal.active {
+    display: flex;
+}
+
+.feedback-dialog {
+    background: white;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: feedbackSlideIn 0.3s ease;
+}
+
+@keyframes feedbackSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feedback-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px 24px;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.feedback-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.feedback-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.feedback-close:hover {
+    opacity: 1;
+}
+
+.feedback-body {
+    padding: 24px;
+}
+
+.feedback-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.feedback-tab {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.feedback-tab.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.feedback-tab:hover:not(.active) {
+    background: rgba(46, 125, 50, 0.1);
+}
+
+.feedback-form-group {
+    margin-bottom: 16px;
+}
+
+.feedback-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.feedback-form-group input,
+.feedback-form-group textarea,
+.feedback-form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.feedback-form-group input:focus,
+.feedback-form-group textarea:focus,
+.feedback-form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.feedback-form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.feedback-form-group small {
+    color: #888;
+    font-size: 12px;
+}
+
+.feedback-submit {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feedback-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.feedback-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.feedback-success,
+.feedback-track-result {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.feedback-success i,
+.feedback-track-result i {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+}
+
+.feedback-success h4 {
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+.tracking-id-display {
+    background: #f5f5f5;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 16px 0;
+    display: inline-block;
+}
+
+.feedback-hidden {
+    display: none !important;
+}
+
+/* Honeypot field - hidden from humans, visible to bots */
+.feedback-hp {
+    position: absolute;
+    left: -9999px;
+}
+
+@media (max-width: 768px) {
+    .feedback-bubble {
+        bottom: 80px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .feedback-bubble i {
+        font-size: 20px;
+    }
+    
+    .feedback-dialog {
+        max-height: 85vh;
+    }
+}

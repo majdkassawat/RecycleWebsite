@@ -1,0 +1,126 @@
+name: Feedback Submission
+
+on:
+  repository_dispatch:
+    types: [feedback-submission]
+
+jobs:
+  submit-feedback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate and Submit Feedback
+        env:
+          KAITEN_API_KEY: ${{ secrets.KAITEN_API_KEY }}
+          KAITEN_BASE_URL: "https://aldureid.kaiten.ru/api/latest"
+          # Board and column IDs - update these after creating the Suggestions board
+          BOARD_ID: "1609536"
+          COLUMN_ID: "5582100"  # To Do column
+        run: |
+          # Extract payload
+          NAME="${{ github.event.client_payload.name }}"
+          EMAIL="${{ github.event.client_payload.email }}"
+          CATEGORY="${{ github.event.client_payload.category }}"
+          SUGGESTION="${{ github.event.client_payload.suggestion }}"
+          LANGUAGE="${{ github.event.client_payload.language }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+          
+          # Security: Basic validation
+          if [ -z "$SUGGESTION" ] || [ ${#SUGGESTION} -lt 10 ]; then
+            echo "❌ Suggestion too short or empty"
+            exit 1
+          fi
+          
+          if [ ${#SUGGESTION} -gt 5000 ]; then
+            echo "❌ Suggestion too long (max 5000 chars)"
+            exit 1
+          fi
+          
+          # Generate tracking ID (first 8 chars of SHA)
+          TRACKING_ID=$(echo -n "${TIMESTAMP}${SUGGESTION}" | sha256sum | cut -c1-8 | tr '[:lower:]' '[:upper:]')
+          
+          # Build card title
+          TITLE="[${CATEGORY}] ${SUGGESTION:0:50}..."
+          if [ ${#SUGGESTION} -le 50 ]; then
+            TITLE="[${CATEGORY}] ${SUGGESTION}"
+          fi
+          
+          # Build card description with metadata
+          DESCRIPTION="## Suggestion\n\n${SUGGESTION}\n\n---\n\n**Tracking ID:** \`${TRACKING_ID}\`\n**Submitted:** ${TIMESTAMP}\n**Category:** ${CATEGORY}\n**Language:** ${LANGUAGE}"
+          
+          if [ -n "$NAME" ]; then
+            DESCRIPTION="${DESCRIPTION}\n**Name:** ${NAME}"
+          fi
+          
+          if [ -n "$EMAIL" ]; then
+            DESCRIPTION="${DESCRIPTION}\n**Email:** ${EMAIL}"
+          fi
+          
+          # Create card in Kaiten
+          echo "📝 Creating feedback card..."
+          
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: Bearer $KAITEN_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"title\": $(echo "$TITLE" | jq -Rs .),
+              \"description\": $(echo -e "$DESCRIPTION" | jq -Rs .),
+              \"column_id\": $COLUMN_ID,
+              \"board_id\": $BOARD_ID
+            }" \
+            "$KAITEN_BASE_URL/cards")
+          
+          CARD_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+          
+          if [ -n "$CARD_ID" ]; then
+            echo "✅ Feedback submitted successfully!"
+            echo "Card ID: $CARD_ID"
+            echo "Tracking ID: $TRACKING_ID"
+            
+            # Add a tag for the category
+            curl -s -X POST \
+              -H "Authorization: Bearer $KAITEN_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\": \"$CATEGORY\"}" \
+              "$KAITEN_BASE_URL/cards/$CARD_ID/tags" > /dev/null 2>&1 || true
+          else
+            echo "❌ Failed to create card"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+  check-status:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.client_payload.action == 'check-status' }}
+    steps:
+      - name: Check Feedback Status
+        env:
+          KAITEN_API_KEY: ${{ secrets.KAITEN_API_KEY }}
+          KAITEN_BASE_URL: "https://aldureid.kaiten.ru/api/latest"
+          BOARD_ID: "1609536"
+        run: |
+          TRACKING_ID="${{ github.event.client_payload.tracking_id }}"
+          
+          echo "🔍 Searching for tracking ID: $TRACKING_ID"
+          
+          # Search cards on the board
+          CARDS=$(curl -s -H "Authorization: Bearer $KAITEN_API_KEY" \
+            "$KAITEN_BASE_URL/boards/$BOARD_ID/cards")
+          
+          # Find card with matching tracking ID in description
+          CARD=$(echo "$CARDS" | jq -r ".[] | select(.description | contains(\"$TRACKING_ID\"))")
+          
+          if [ -n "$CARD" ]; then
+            TITLE=$(echo "$CARD" | jq -r '.title')
+            COLUMN_ID=$(echo "$CARD" | jq -r '.column_id')
+            
+            # Get column name
+            BOARD_INFO=$(curl -s -H "Authorization: Bearer $KAITEN_API_KEY" \
+              "$KAITEN_BASE_URL/boards/$BOARD_ID")
+            COLUMN_NAME=$(echo "$BOARD_INFO" | jq -r ".columns[] | select(.id == $COLUMN_ID) | .title")
+            
+            echo "✅ Found your suggestion!"
+            echo "Title: $TITLE"
+            echo "Status: $COLUMN_NAME"
+          else
+            echo "❌ No suggestion found with tracking ID: $TRACKING_ID"
+          fi

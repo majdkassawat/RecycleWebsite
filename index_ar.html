@@ -239,6 +239,85 @@
         </div>
     </footer>
 
+    <!-- Feedback Widget -->
+    <button id="feedbackBubble" class="feedback-bubble" title="شاركنا رأيك">
+        <i class="fas fa-lightbulb"></i>
+        <span class="bubble-tooltip">شارك فكرة!</span>
+    </button>
+
+    <div id="feedbackModal" class="feedback-modal">
+        <div class="feedback-dialog">
+            <div class="feedback-header">
+                <h3><i class="fas fa-lightbulb"></i> شارك أفكارك</h3>
+                <button id="feedbackClose" class="feedback-close">&times;</button>
+            </div>
+            <div class="feedback-body">
+                <div class="feedback-tabs">
+                    <button class="feedback-tab active" data-tab="submit">إرسال اقتراح</button>
+                    <button class="feedback-tab" data-tab="track">تتبع الحالة</button>
+                </div>
+
+                <!-- Submit Form -->
+                <div id="feedbackFormView">
+                    <form id="feedbackForm">
+                        <div class="feedback-form-group">
+                            <label for="feedbackName">الاسم (اختياري)</label>
+                            <input type="text" id="feedbackName" name="name" placeholder="اسمك">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackEmail">البريد الإلكتروني (اختياري)</label>
+                            <input type="email" id="feedbackEmail" name="email" placeholder="للحصول على تحديثات حول اقتراحك">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackCategory">التصنيف</label>
+                            <select id="feedbackCategory" name="category" required>
+                                <option value="website">تحسين الموقع</option>
+                                <option value="activity">فكرة نشاط</option>
+                                <option value="general">اقتراح عام</option>
+                                <option value="partnership">فرصة شراكة</option>
+                            </select>
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackSuggestion">اقتراحك *</label>
+                            <textarea id="feedbackSuggestion" name="suggestion" required minlength="10" maxlength="2000" placeholder="شارك فكرتك أو ملاحظاتك أو اقتراحك..."></textarea>
+                            <small><span id="charCount">0</span>/2000 حرف</small>
+                        </div>
+                        <input type="text" id="feedbackHp" name="website_url" class="feedback-hp" tabindex="-1" autocomplete="off">
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-paper-plane"></i> إرسال الاقتراح
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Track Form -->
+                <div id="feedbackTrackView" class="feedback-hidden">
+                    <form id="trackForm">
+                        <div class="feedback-form-group">
+                            <label for="trackingIdInput">رقم التتبع</label>
+                            <input type="text" id="trackingIdInput" placeholder="مثال: TDW-ABC123" required>
+                        </div>
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-search"></i> التحقق من الحالة
+                        </button>
+                    </form>
+                    <div id="trackResult" class="feedback-hidden">
+                        <div id="trackResultContent" class="feedback-track-result"></div>
+                    </div>
+                </div>
+
+                <!-- Success View -->
+                <div id="feedbackSuccess" class="feedback-success feedback-hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>شكراً لك!</h4>
+                    <p>تم استلام اقتراحك.</p>
+                    <p>رقم التتبع الخاص بك:</p>
+                    <div id="trackingIdDisplay" class="tracking-id-display"></div>
+                    <p><small>احفظ هذا الرقم للتحقق من حالة اقتراحك لاحقاً.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <button id="backToTop" title="العودة للأعلى"><i class="fas fa-arrow-up"></i></button>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>

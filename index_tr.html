@@ -239,6 +239,85 @@
         </div>
     </footer>
 
+    <!-- Feedback Widget -->
+    <button id="feedbackBubble" class="feedback-bubble" title="Geri bildiriminizi paylaşın">
+        <i class="fas fa-lightbulb"></i>
+        <span class="bubble-tooltip">Fikir paylaş!</span>
+    </button>
+
+    <div id="feedbackModal" class="feedback-modal">
+        <div class="feedback-dialog">
+            <div class="feedback-header">
+                <h3><i class="fas fa-lightbulb"></i> Fikirlerinizi Paylaşın</h3>
+                <button id="feedbackClose" class="feedback-close">&times;</button>
+            </div>
+            <div class="feedback-body">
+                <div class="feedback-tabs">
+                    <button class="feedback-tab active" data-tab="submit">Öneri Gönder</button>
+                    <button class="feedback-tab" data-tab="track">Durumu Takip Et</button>
+                </div>
+
+                <!-- Submit Form -->
+                <div id="feedbackFormView">
+                    <form id="feedbackForm">
+                        <div class="feedback-form-group">
+                            <label for="feedbackName">İsim (isteğe bağlı)</label>
+                            <input type="text" id="feedbackName" name="name" placeholder="Adınız">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackEmail">E-posta (isteğe bağlı)</label>
+                            <input type="email" id="feedbackEmail" name="email" placeholder="Öneriniz hakkında güncellemeler için">
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackCategory">Kategori</label>
+                            <select id="feedbackCategory" name="category" required>
+                                <option value="website">Web Sitesi İyileştirmesi</option>
+                                <option value="activity">Etkinlik Fikri</option>
+                                <option value="general">Genel Öneri</option>
+                                <option value="partnership">Ortaklık Fırsatı</option>
+                            </select>
+                        </div>
+                        <div class="feedback-form-group">
+                            <label for="feedbackSuggestion">Öneriniz *</label>
+                            <textarea id="feedbackSuggestion" name="suggestion" required minlength="10" maxlength="2000" placeholder="Fikrinizi, geri bildiriminizi veya önerinizi paylaşın..."></textarea>
+                            <small><span id="charCount">0</span>/2000 karakter</small>
+                        </div>
+                        <input type="text" id="feedbackHp" name="website_url" class="feedback-hp" tabindex="-1" autocomplete="off">
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-paper-plane"></i> Öneri Gönder
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Track Form -->
+                <div id="feedbackTrackView" class="feedback-hidden">
+                    <form id="trackForm">
+                        <div class="feedback-form-group">
+                            <label for="trackingIdInput">Takip Numarası</label>
+                            <input type="text" id="trackingIdInput" placeholder="örn. TDW-ABC123" required>
+                        </div>
+                        <button type="submit" class="feedback-submit">
+                            <i class="fas fa-search"></i> Durumu Kontrol Et
+                        </button>
+                    </form>
+                    <div id="trackResult" class="feedback-hidden">
+                        <div id="trackResultContent" class="feedback-track-result"></div>
+                    </div>
+                </div>
+
+                <!-- Success View -->
+                <div id="feedbackSuccess" class="feedback-success feedback-hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Teşekkürler!</h4>
+                    <p>Öneriniz alındı.</p>
+                    <p>Takip numaranız:</p>
+                    <div id="trackingIdDisplay" class="tracking-id-display"></div>
+                    <p><small>Daha sonra durumu kontrol etmek için bu numarayı kaydedin.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <button id="backToTop" title="Başa dön"><i class="fas fa-arrow-up"></i></button>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>
