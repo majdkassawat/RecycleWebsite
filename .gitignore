@@ -2,3 +2,10 @@ __pycache__/
 *.pyc
 tmp_*.html
 .env.local
+
+# Private files
+images/_whatsapp_export/
+images/WhatsApp*.zip
+tools/email_signature.zip
+
+__pycache__/
