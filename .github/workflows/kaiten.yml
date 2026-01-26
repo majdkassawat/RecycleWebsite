@@ -45,17 +45,23 @@ jobs:
       - name: Test API Connectivity
         run: |
           echo "🔍 Testing Kaiten API connectivity..."
-          echo "Trying kaiten.io..."
-          curl -v -s --max-time 10 -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
-            "https://kaiten.io/api/latest/users/current" 2>&1 || true
-          echo ""
-          echo "Trying app.kaiten.io..."
-          curl -v -s --max-time 10 -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
-            "https://app.kaiten.io/api/latest/users/current" 2>&1 || true
-          echo ""
-          echo "Trying kaiten.ru (Russian version)..."
-          curl -v -s --max-time 10 -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
-            "https://kaiten.ru/api/latest/users/current" 2>&1 || true
+          # Kaiten uses different subdomains for app vs marketing site
+          for url in \
+            "https://kaiten.ru/api/latest/users/current" \
+            "https://app.kaiten.ru/api/latest/users/current" \
+            "https://kaiten.io/api/v1/users/current" \
+            "https://app.kaiten.io/api/v1/users/current" \
+            "https://eu.kaiten.io/api/latest/users/current"; do
+            echo ""
+            echo ">>> Trying: $url"
+            response=$(curl -s --max-time 10 -w "\nHTTP_CODE:%{http_code}" \
+              -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+              "$url" 2>&1)
+            http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+            body=$(echo "$response" | grep -v "HTTP_CODE:")
+            echo "HTTP Code: $http_code"
+            echo "Response: $body" | head -c 500
+          done
 
       - name: List Boards
         if: ${{ github.event.inputs.action == 'list-boards' }}
