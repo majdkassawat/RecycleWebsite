@@ -453,12 +453,22 @@
         }
         
         async function loadSuggestions() {
+            console.log('Loading suggestions with key:', adminKey ? 'set' : 'not set');
+            document.getElementById('suggestionsList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading suggestions...</p>
+                </div>
+            `;
+            
             try {
                 const response = await fetch(API_URL, {
                     headers: {
                         'Authorization': `Bearer ${adminKey}`
                     }
                 });
+                
+                console.log('API response status:', response.status);
                 
                 if (response.status === 401) {
                     alert('Invalid admin key');
@@ -471,6 +481,7 @@
                 }
                 
                 allSuggestions = await response.json();
+                console.log('Loaded suggestions:', allSuggestions.length);
                 updateStats();
                 renderSuggestions(allSuggestions);
                 
