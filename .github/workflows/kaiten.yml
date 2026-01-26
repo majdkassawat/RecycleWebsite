@@ -44,37 +44,27 @@ jobs:
     steps:
       - name: Test API Connectivity
         run: |
-          echo "🔍 Testing Kaiten API with different auth methods..."
+          echo "🔍 Testing Kaiten API..."
           API_KEY="${{ secrets.KAITEN_API_KEY }}"
-          BASE_URL="https://app.kaiten.ru/api/latest"
           
-          echo ">>> Test 1: Bearer token"
-          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
+          # Test app.kaiten.ru with full response
+          echo ">>> Full response from app.kaiten.ru:"
+          curl -s --max-time 10 \
             -H "Authorization: Bearer $API_KEY" \
-            "$BASE_URL/users/current" 2>&1 | tail -5
+            -H "Content-Type: application/json" \
+            "https://app.kaiten.ru/api/latest/users/current" 2>&1
           
           echo ""
-          echo ">>> Test 2: Token header (no Bearer)"
-          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
-            -H "Authorization: $API_KEY" \
-            "$BASE_URL/users/current" 2>&1 | tail -5
+          echo ">>> Trying /api/v1/ instead of /api/latest/:"
+          curl -s --max-time 10 \
+            -H "Authorization: Bearer $API_KEY" \
+            "https://app.kaiten.ru/api/v1/users/current" 2>&1
           
           echo ""
-          echo ">>> Test 3: X-Auth-Token header"
-          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
-            -H "X-Auth-Token: $API_KEY" \
-            "$BASE_URL/users/current" 2>&1 | tail -5
-            
-          echo ""
-          echo ">>> Test 4: API-Key header"
-          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
-            -H "X-API-Key: $API_KEY" \
-            "$BASE_URL/users/current" 2>&1 | tail -5
-            
-          echo ""
-          echo ">>> Test 5: Query param"
-          curl -s --max-time 10 -w "\nHTTP: %{http_code}" \
-            "$BASE_URL/users/current?token=$API_KEY" 2>&1 | tail -5
+          echo ">>> Trying spaces endpoint (common first call):"
+          curl -s --max-time 10 \
+            -H "Authorization: Bearer $API_KEY" \
+            "https://app.kaiten.ru/api/latest/spaces" 2>&1
 
       - name: List Boards
         if: ${{ github.event.inputs.action == 'list-boards' }}
