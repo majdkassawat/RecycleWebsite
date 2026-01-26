@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggestions Admin - Tadweer Tech</title>
+    <link rel="icon" href="images/logo_circular.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #0288d1;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-header h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+        }
+        
+        .admin-header img {
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stat-card h3 {
+            color: #888;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .filters {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .filters select, .filters input {
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filters select:focus, .filters input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .suggestions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .suggestion-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .suggestion-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        
+        .suggestion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+        
+        .suggestion-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-category {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .badge-status {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .badge-status.new {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .badge-status.reviewing {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .badge-status.implemented {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .badge-status.declined {
+            background: #fafafa;
+            color: #757575;
+        }
+        
+        .tracking-id {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .suggestion-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+        
+        .suggestion-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .suggestion-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .setup-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .setup-notice h3 {
+            color: #856404;
+            margin-bottom: 12px;
+        }
+        
+        .setup-notice code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .setup-notice ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .config-form {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .config-form input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .suggestion-header {
+                flex-direction: column;
+            }
+            
+            .suggestion-footer {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <h1>
+            <img src="images/logo_circular.png" alt="Logo">
+            Suggestions Dashboard
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="loadSuggestions()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <a href="index.html" class="btn btn-primary">
+                <i class="fas fa-home"></i> Back to Site
+            </a>
+        </div>
+    </header>
+    
+    <main class="admin-container">
+        <!-- Setup Notice - shown until Supabase is configured -->
+        <div id="setupNotice" class="setup-notice">
+            <h3><i class="fas fa-cog"></i> One-Time Setup Required</h3>
+            <p>To store suggestions, you need to set up a free Supabase database:</p>
+            <ol>
+                <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create a free account</li>
+                <li>Create a new project (any name, e.g., "tadweer-suggestions")</li>
+                <li>Go to <strong>Table Editor</strong> → <strong>Create a new table</strong> named <code>suggestions</code></li>
+                <li>Add these columns:
+                    <ul>
+                        <li><code>id</code> - uuid (default, primary key)</li>
+                        <li><code>tracking_id</code> - text</li>
+                        <li><code>name</code> - text</li>
+                        <li><code>email</code> - text</li>
+                        <li><code>category</code> - text</li>
+                        <li><code>suggestion</code> - text</li>
+                        <li><code>status</code> - text (default: 'new')</li>
+                        <li><code>created_at</code> - timestamptz (default: now())</li>
+                        <li><code>page_url</code> - text</li>
+                    </ul>
+                </li>
+                <li>Go to <strong>Settings</strong> → <strong>API</strong> and copy your Project URL and anon/public key</li>
+                <li>Go to <strong>Authentication</strong> → <strong>Policies</strong> → Enable RLS on the table, then add policies:
+                    <ul>
+                        <li>INSERT: Allow anonymous (for public submissions)</li>
+                        <li>SELECT/UPDATE: Allow authenticated only (for admin)</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="config-form">
+                <input type="text" id="supabaseUrl" placeholder="Project URL (https://xxx.supabase.co)">
+                <input type="text" id="supabaseKey" placeholder="anon/public key">
+                <button class="btn btn-primary" onclick="saveConfig()">
+                    <i class="fas fa-save"></i> Save Configuration
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stats Row -->
+        <div class="stats-row" id="statsRow" style="display: none;">
+            <div class="stat-card">
+                <h3>Total Suggestions</h3>
+                <div class="value" id="statTotal">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>New</h3>
+                <div class="value" id="statNew">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Under Review</h3>
+                <div class="value" id="statReviewing">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Implemented</h3>
+                <div class="value" id="statImplemented">0</div>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters" id="filtersRow" style="display: none;">
+            <select id="filterStatus" onchange="filterSuggestions()">
+                <option value="">All Statuses</option>
+                <option value="new">New</option>
+                <option value="reviewing">Under Review</option>
+                <option value="implemented">Implemented</option>
+                <option value="declined">Declined</option>
+            </select>
+            <select id="filterCategory" onchange="filterSuggestions()">
+                <option value="">All Categories</option>
+                <option value="website">Website</option>
+                <option value="activity">Activity</option>
+                <option value="general">General</option>
+                <option value="partnership">Partnership</option>
+            </select>
+            <input type="text" id="filterSearch" placeholder="Search..." oninput="filterSuggestions()">
+        </div>
+        
+        <!-- Suggestions List -->
+        <div class="suggestions-list" id="suggestionsList">
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>Configure Supabase above to view suggestions</p>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        let allSuggestions = [];
+        let supabaseUrl = localStorage.getItem('supabase_url') || '';
+        let supabaseKey = localStorage.getItem('supabase_key') || '';
+        
+        // Check if configured
+        function checkConfig() {
+            if (supabaseUrl && supabaseKey) {
+                document.getElementById('setupNotice').style.display = 'none';
+                document.getElementById('statsRow').style.display = 'grid';
+                document.getElementById('filtersRow').style.display = 'flex';
+                loadSuggestions();
+            } else {
+                document.getElementById('supabaseUrl').value = supabaseUrl;
+                document.getElementById('supabaseKey').value = supabaseKey;
+            }
+        }
+        
+        function saveConfig() {
+            supabaseUrl = document.getElementById('supabaseUrl').value.trim();
+            supabaseKey = document.getElementById('supabaseKey').value.trim();
+            
+            if (!supabaseUrl || !supabaseKey) {
+                alert('Please enter both URL and API key');
+                return;
+            }
+            
+            localStorage.setItem('supabase_url', supabaseUrl);
+            localStorage.setItem('supabase_key', supabaseKey);
+            
+            // Also save to a config that the main site can use
+            localStorage.setItem('tadweer_supabase_config', JSON.stringify({
+                url: supabaseUrl,
+                key: supabaseKey
+            }));
+            
+            checkConfig();
+        }
+        
+        async function loadSuggestions() {
+            if (!supabaseUrl || !supabaseKey) return;
+            
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/suggestions?order=created_at.desc`, {
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                allSuggestions = await response.json();
+                updateStats();
+                renderSuggestions(allSuggestions);
+                
+            } catch (error) {
+                console.error('Failed to load suggestions:', error);
+                document.getElementById('suggestionsList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load suggestions. Check your configuration.</p>
+                        <p><small>${error.message}</small></p>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('statTotal').textContent = allSuggestions.length;
+            document.getElementById('statNew').textContent = allSuggestions.filter(s => s.status === 'new').length;
+            document.getElementById('statReviewing').textContent = allSuggestions.filter(s => s.status === 'reviewing').length;
+            document.getElementById('statImplemented').textContent = allSuggestions.filter(s => s.status === 'implemented').length;
+        }
+        
+        function filterSuggestions() {
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            const search = document.getElementById('filterSearch').value.toLowerCase();
+            
+            let filtered = allSuggestions;
+            
+            if (status) {
+                filtered = filtered.filter(s => s.status === status);
+            }
+            if (category) {
+                filtered = filtered.filter(s => s.category === category);
+            }
+            if (search) {
+                filtered = filtered.filter(s => 
+                    s.suggestion.toLowerCase().includes(search) ||
+                    s.name.toLowerCase().includes(search) ||
+                    s.tracking_id.toLowerCase().includes(search)
+                );
+            }
+            
+            renderSuggestions(filtered);
+        }
+        
+        function renderSuggestions(suggestions) {
+            const container = document.getElementById('suggestionsList');
+            
+            if (suggestions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No suggestions found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = suggestions.map(s => `
+                <div class="suggestion-card" data-id="${s.id}">
+                    <div class="suggestion-header">
+                        <div class="suggestion-meta">
+                            <span class="badge badge-category">${s.category}</span>
+                            <span class="badge badge-status ${s.status}">${s.status}</span>
+                            <span class="tracking-id">${s.tracking_id}</span>
+                        </div>
+                    </div>
+                    <div class="suggestion-content">${escapeHtml(s.suggestion)}</div>
+                    <div class="suggestion-footer">
+                        <div>
+                            <strong>${escapeHtml(s.name)}</strong>
+                            ${s.email ? `&bull; ${escapeHtml(s.email)}` : ''}
+                            &bull; ${new Date(s.created_at).toLocaleString()}
+                        </div>
+                        <div class="suggestion-actions">
+                            <button class="action-btn" onclick="updateStatus('${s.id}', 'reviewing')">
+                                <i class="fas fa-eye"></i> Review
+                            </button>
+                            <button class="action-btn" onclick="updateStatus('${s.id}', 'implemented')">
+                                <i class="fas fa-check"></i> Implement
+                            </button>
+                            <button class="action-btn" onclick="updateStatus('${s.id}', 'declined')">
+                                <i class="fas fa-times"></i> Decline
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        async function updateStatus(id, status) {
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/suggestions?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response.ok) {
+                    // Update local data
+                    const suggestion = allSuggestions.find(s => s.id === id);
+                    if (suggestion) {
+                        suggestion.status = status;
+                    }
+                    updateStats();
+                    filterSuggestions();
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                console.error('Update failed:', error);
+                alert('Failed to update status');
+            }
+        }
+        
+        // Initialize
+        checkConfig();
+    </script>
+</body>
+</html>

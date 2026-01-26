@@ -125,6 +125,15 @@ function highlightNav() {
     
     if (!bubble || !modal) return;
 
+    // Supabase configuration - will be set from admin page
+    const getConfig = () => {
+        try {
+            return JSON.parse(localStorage.getItem('tadweer_supabase_config') || '{}');
+        } catch {
+            return {};
+        }
+    };
+
     // Toggle modal
     bubble.addEventListener('click', () => {
         modal.classList.add('active');
@@ -179,7 +188,7 @@ function highlightNav() {
         return id;
     };
 
-    // Submit feedback - stores locally and opens email
+    // Submit feedback to Supabase
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -199,46 +208,69 @@ function highlightNav() {
         const trackingId = generateTrackingId();
         
         const data = {
-            id: trackingId,
+            tracking_id: trackingId,
             name: formData.get('name') || 'Anonymous',
             email: formData.get('email') || '',
             category: formData.get('category'),
             suggestion: formData.get('suggestion'),
-            date: new Date().toLocaleDateString(),
-            status: 'Submitted'
+            status: 'new',
+            page_url: window.location.href
         };
 
-        // Store in localStorage for tracking
+        // Store locally for tracking
         const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
-        stored.push(data);
+        stored.push({
+            ...data,
+            id: trackingId,
+            date: new Date().toLocaleDateString()
+        });
         localStorage.setItem('tadweer_feedback', JSON.stringify(stored.slice(-20)));
 
-        // Build email body
-        const emailSubject = encodeURIComponent(`[${data.category}] Website Suggestion - ${trackingId}`);
-        const emailBody = encodeURIComponent(
-            `Tracking ID: ${trackingId}\n` +
-            `Category: ${data.category}\n` +
-            `From: ${data.name}${data.email ? ' (' + data.email + ')' : ''}\n` +
-            `Date: ${new Date().toISOString()}\n` +
-            `Page: ${window.location.href}\n\n` +
-            `--- Suggestion ---\n\n` +
-            `${data.suggestion}\n\n` +
-            `--- End ---`
-        );
+        // Try to submit to Supabase
+        const config = getConfig();
+        let submitted = false;
+        
+        if (config.url && config.key) {
+            try {
+                const response = await fetch(`${config.url}/rest/v1/suggestions`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': config.key,
+                        'Authorization': `Bearer ${config.key}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok || response.status === 201) {
+                    submitted = true;
+                }
+            } catch (error) {
+                console.error('Supabase submission failed:', error);
+            }
+        }
 
-        // Open email client (mailto)
-        const mailtoLink = `mailto:tadweer.sy@gmail.com?subject=${emailSubject}&body=${emailBody}`;
-        
-        // Small delay for UX
-        await new Promise(r => setTimeout(r, 500));
-        
+        // Fallback: open email if Supabase not configured or failed
+        if (!submitted) {
+            const emailSubject = encodeURIComponent(`[${data.category}] Website Suggestion - ${trackingId}`);
+            const emailBody = encodeURIComponent(
+                `Tracking ID: ${trackingId}\n` +
+                `Category: ${data.category}\n` +
+                `From: ${data.name}${data.email ? ' (' + data.email + ')' : ''}\n` +
+                `Date: ${new Date().toISOString()}\n` +
+                `Page: ${window.location.href}\n\n` +
+                `--- Suggestion ---\n\n` +
+                `${data.suggestion}\n\n` +
+                `--- End ---`
+            );
+            window.location.href = `mailto:tadweer.sy@gmail.com?subject=${emailSubject}&body=${emailBody}`;
+        }
+
         // Show success message
         document.getElementById('trackingIdDisplay').textContent = trackingId;
         formView.classList.add('feedback-hidden');
         successView.classList.remove('feedback-hidden');
-        
-        // Open email client
-        window.location.href = mailtoLink;
         
         // Reset form
         form.reset();
@@ -247,37 +279,70 @@ function highlightNav() {
         submitBtn.innerHTML = originalText;
     });
 
-    // Track existing feedback
-    trackForm?.addEventListener('submit', (e) => {
+    // Track existing feedback - check both local and Supabase
+    trackForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const trackId = document.getElementById('trackingIdInput').value.trim().toUpperCase();
         
         if (!trackId) return;
 
-        // Check local storage
-        const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
-        const found = stored.find(f => f.id === trackId);
-
         const resultContent = document.getElementById('trackResultContent');
+        resultContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+        trackResult.classList.remove('feedback-hidden');
+
+        // Check local storage first
+        const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
+        let found = stored.find(f => f.tracking_id === trackId || f.id === trackId);
+
+        // Try Supabase if configured and not found locally
+        const config = getConfig();
+        if (config.url && config.key) {
+            try {
+                const response = await fetch(
+                    `${config.url}/rest/v1/suggestions?tracking_id=eq.${trackId}&select=tracking_id,category,status,created_at`,
+                    {
+                        headers: {
+                            'apikey': config.key,
+                            'Authorization': `Bearer ${config.key}`
+                        }
+                    }
+                );
+                
+                if (response.ok) {
+                    const results = await response.json();
+                    if (results.length > 0) {
+                        found = results[0];
+                        found.date = new Date(found.created_at).toLocaleDateString();
+                    }
+                }
+            } catch (error) {
+                console.error('Supabase lookup failed:', error);
+            }
+        }
+
         if (found) {
+            const statusLabels = {
+                'new': 'Received - Awaiting Review',
+                'reviewing': 'Under Review',
+                'implemented': '✅ Implemented',
+                'declined': 'Not Planned'
+            };
             resultContent.innerHTML = `
                 <i class="fas fa-check-circle"></i>
                 <h4>Suggestion Found</h4>
-                <p><strong>ID:</strong> ${found.id}</p>
+                <p><strong>ID:</strong> ${found.tracking_id || found.id}</p>
                 <p><strong>Category:</strong> ${found.category}</p>
                 <p><strong>Submitted:</strong> ${found.date}</p>
-                <p><strong>Status:</strong> ${found.status}</p>
-                <p><small>Preview: "${found.suggestion.substring(0, 80)}..."</small></p>
+                <p><strong>Status:</strong> ${statusLabels[found.status] || found.status}</p>
             `;
         } else {
             resultContent.innerHTML = `
                 <i class="fas fa-search" style="color: #888;"></i>
                 <h4>Not Found</h4>
                 <p>No suggestion found with ID: ${trackId}</p>
-                <p><small>Note: Only suggestions submitted from this browser can be tracked.</small></p>
+                <p><small>Please check the ID and try again.</small></p>
             `;
         }
-        trackResult.classList.remove('feedback-hidden');
     });
 })();
 
