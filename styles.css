@@ -482,23 +482,31 @@ h2 {
 .dots {
     display: flex;
     justify-content: center;
-    gap: 0.6rem;
+    gap: 6px;
     flex: 1;
+    flex-wrap: wrap;
+    max-width: 280px;
+    margin: 0 auto;
 }
 
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    border: 2px solid var(--primary-color);
-    background: transparent;
+    border: none;
+    background: rgba(46, 125, 50, 0.3);
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
+    padding: 0;
+}
+
+.dot:hover {
+    background: rgba(46, 125, 50, 0.6);
 }
 
 .dot.active {
     background: var(--primary-color);
-    transform: scale(1.05);
+    transform: scale(1.2);
 }
 
 /* Contact Section */
