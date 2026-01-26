@@ -125,14 +125,8 @@ function highlightNav() {
     
     if (!bubble || !modal) return;
 
-    // Supabase configuration - will be set from admin page
-    const getConfig = () => {
-        try {
-            return JSON.parse(localStorage.getItem('tadweer_supabase_config') || '{}');
-        } catch {
-            return {};
-        }
-    };
+    // API endpoint - uses Vercel serverless function
+    const API_URL = 'https://tadweer-website.vercel.app/api/suggestions';
 
     // Toggle modal
     bubble.addEventListener('click', () => {
@@ -178,17 +172,7 @@ function highlightNav() {
         }
     });
 
-    // Generate tracking ID
-    const generateTrackingId = () => {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let id = 'TDW-';
-        for (let i = 0; i < 6; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
-    };
-
-    // Submit feedback to Supabase
+    // Submit feedback to Vercel API
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -205,81 +189,56 @@ function highlightNav() {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const formData = new FormData(form);
-        const trackingId = generateTrackingId();
         
         const data = {
-            tracking_id: trackingId,
             name: formData.get('name') || 'Anonymous',
             email: formData.get('email') || '',
             category: formData.get('category'),
             suggestion: formData.get('suggestion'),
-            status: 'new',
             page_url: window.location.href
         };
 
-        // Store locally for tracking
-        const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
-        stored.push({
-            ...data,
-            id: trackingId,
-            date: new Date().toLocaleDateString()
-        });
-        localStorage.setItem('tadweer_feedback', JSON.stringify(stored.slice(-20)));
-
-        // Try to submit to Supabase
-        const config = getConfig();
-        let submitted = false;
-        
-        if (config.url && config.key) {
-            try {
-                const response = await fetch(`${config.url}/rest/v1/suggestions`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': config.key,
-                        'Authorization': `Bearer ${config.key}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify(data)
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.tracking_id) {
+                // Store locally for backup tracking
+                const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
+                stored.push({
+                    tracking_id: result.tracking_id,
+                    category: data.category,
+                    date: new Date().toLocaleDateString(),
+                    status: 'new'
                 });
-                
-                if (response.ok || response.status === 201) {
-                    submitted = true;
-                }
-            } catch (error) {
-                console.error('Supabase submission failed:', error);
+                localStorage.setItem('tadweer_feedback', JSON.stringify(stored.slice(-20)));
+
+                // Show success
+                document.getElementById('trackingIdDisplay').textContent = result.tracking_id;
+                formView.classList.add('feedback-hidden');
+                successView.classList.remove('feedback-hidden');
+                form.reset();
+                if (charCount) charCount.textContent = '0';
+            } else {
+                throw new Error(result.error || 'Submission failed');
             }
+        } catch (error) {
+            console.error('Submission error:', error);
+            alert('Failed to submit. Please try again later.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
-
-        // Fallback: open email if Supabase not configured or failed
-        if (!submitted) {
-            const emailSubject = encodeURIComponent(`[${data.category}] Website Suggestion - ${trackingId}`);
-            const emailBody = encodeURIComponent(
-                `Tracking ID: ${trackingId}\n` +
-                `Category: ${data.category}\n` +
-                `From: ${data.name}${data.email ? ' (' + data.email + ')' : ''}\n` +
-                `Date: ${new Date().toISOString()}\n` +
-                `Page: ${window.location.href}\n\n` +
-                `--- Suggestion ---\n\n` +
-                `${data.suggestion}\n\n` +
-                `--- End ---`
-            );
-            window.location.href = `mailto:tadweer.sy@gmail.com?subject=${emailSubject}&body=${emailBody}`;
-        }
-
-        // Show success message
-        document.getElementById('trackingIdDisplay').textContent = trackingId;
-        formView.classList.add('feedback-hidden');
-        successView.classList.remove('feedback-hidden');
-        
-        // Reset form
-        form.reset();
-        if (charCount) charCount.textContent = '0';
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
     });
 
-    // Track existing feedback - check both local and Supabase
+    // Track existing feedback
     trackForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const trackId = document.getElementById('trackingIdInput').value.trim().toUpperCase();
@@ -290,57 +249,52 @@ function highlightNav() {
         resultContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
         trackResult.classList.remove('feedback-hidden');
 
-        // Check local storage first
-        const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
-        let found = stored.find(f => f.tracking_id === trackId || f.id === trackId);
+        try {
+            // Try API first
+            const response = await fetch(`${API_URL}?tracking_id=${encodeURIComponent(trackId)}`);
+            const results = await response.json();
+            
+            let found = results.length > 0 ? results[0] : null;
 
-        // Try Supabase if configured and not found locally
-        const config = getConfig();
-        if (config.url && config.key) {
-            try {
-                const response = await fetch(
-                    `${config.url}/rest/v1/suggestions?tracking_id=eq.${trackId}&select=tracking_id,category,status,created_at`,
-                    {
-                        headers: {
-                            'apikey': config.key,
-                            'Authorization': `Bearer ${config.key}`
-                        }
-                    }
-                );
-                
-                if (response.ok) {
-                    const results = await response.json();
-                    if (results.length > 0) {
-                        found = results[0];
-                        found.date = new Date(found.created_at).toLocaleDateString();
-                    }
-                }
-            } catch (error) {
-                console.error('Supabase lookup failed:', error);
+            // Fall back to local storage
+            if (!found) {
+                const stored = JSON.parse(localStorage.getItem('tadweer_feedback') || '[]');
+                found = stored.find(f => f.tracking_id === trackId);
             }
-        }
 
-        if (found) {
-            const statusLabels = {
-                'new': 'Received - Awaiting Review',
-                'reviewing': 'Under Review',
-                'implemented': '✅ Implemented',
-                'declined': 'Not Planned'
-            };
+            if (found) {
+                const statusLabels = {
+                    'new': 'Received - Awaiting Review',
+                    'reviewing': 'Under Review',
+                    'implemented': '✅ Implemented',
+                    'declined': 'Not Planned'
+                };
+                const date = found.created_at 
+                    ? new Date(found.created_at).toLocaleDateString()
+                    : found.date || 'Unknown';
+                    
+                resultContent.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Suggestion Found</h4>
+                    <p><strong>ID:</strong> ${found.tracking_id}</p>
+                    <p><strong>Category:</strong> ${found.category}</p>
+                    <p><strong>Submitted:</strong> ${date}</p>
+                    <p><strong>Status:</strong> ${statusLabels[found.status] || found.status}</p>
+                `;
+            } else {
+                resultContent.innerHTML = `
+                    <i class="fas fa-search" style="color: #888;"></i>
+                    <h4>Not Found</h4>
+                    <p>No suggestion found with ID: ${trackId}</p>
+                    <p><small>Please check the ID and try again.</small></p>
+                `;
+            }
+        } catch (error) {
+            console.error('Tracking error:', error);
             resultContent.innerHTML = `
-                <i class="fas fa-check-circle"></i>
-                <h4>Suggestion Found</h4>
-                <p><strong>ID:</strong> ${found.tracking_id || found.id}</p>
-                <p><strong>Category:</strong> ${found.category}</p>
-                <p><strong>Submitted:</strong> ${found.date}</p>
-                <p><strong>Status:</strong> ${statusLabels[found.status] || found.status}</p>
-            `;
-        } else {
-            resultContent.innerHTML = `
-                <i class="fas fa-search" style="color: #888;"></i>
-                <h4>Not Found</h4>
-                <p>No suggestion found with ID: ${trackId}</p>
-                <p><small>Please check the ID and try again.</small></p>
+                <i class="fas fa-exclamation-triangle" style="color: #f57c00;"></i>
+                <h4>Error</h4>
+                <p>Could not check status. Please try again later.</p>
             `;
         }
     });

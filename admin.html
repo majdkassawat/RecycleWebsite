@@ -66,6 +66,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
         
         .btn-primary {
@@ -90,6 +91,47 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .login-form h2 {
+            margin-bottom: 24px;
+            color: var(--primary-color);
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .login-form button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
         }
         
         .stats-row {
@@ -273,44 +315,8 @@
             opacity: 0.5;
         }
         
-        .setup-notice {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 30px;
-        }
-        
-        .setup-notice h3 {
-            color: #856404;
-            margin-bottom: 12px;
-        }
-        
-        .setup-notice code {
-            background: #f8f9fa;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        
-        .setup-notice ol {
-            margin-left: 20px;
-            line-height: 1.8;
-        }
-        
-        .config-form {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-        
-        .config-form input {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
+        .hidden {
+            display: none !important;
         }
         
         @media (max-width: 768px) {
@@ -341,6 +347,9 @@
             <button class="btn btn-secondary" onclick="loadSuggestions()">
                 <i class="fas fa-sync-alt"></i> Refresh
             </button>
+            <button class="btn btn-secondary" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
             <a href="index.html" class="btn btn-primary">
                 <i class="fas fa-home"></i> Back to Site
             </a>
@@ -348,141 +357,114 @@
     </header>
     
     <main class="admin-container">
-        <!-- Setup Notice - shown until Supabase is configured -->
-        <div id="setupNotice" class="setup-notice">
-            <h3><i class="fas fa-cog"></i> One-Time Setup Required</h3>
-            <p>To store suggestions, you need to set up a free Supabase database:</p>
-            <ol>
-                <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create a free account</li>
-                <li>Create a new project (any name, e.g., "tadweer-suggestions")</li>
-                <li>Go to <strong>Table Editor</strong> → <strong>Create a new table</strong> named <code>suggestions</code></li>
-                <li>Add these columns:
-                    <ul>
-                        <li><code>id</code> - uuid (default, primary key)</li>
-                        <li><code>tracking_id</code> - text</li>
-                        <li><code>name</code> - text</li>
-                        <li><code>email</code> - text</li>
-                        <li><code>category</code> - text</li>
-                        <li><code>suggestion</code> - text</li>
-                        <li><code>status</code> - text (default: 'new')</li>
-                        <li><code>created_at</code> - timestamptz (default: now())</li>
-                        <li><code>page_url</code> - text</li>
-                    </ul>
-                </li>
-                <li>Go to <strong>Settings</strong> → <strong>API</strong> and copy your Project URL and anon/public key</li>
-                <li>Go to <strong>Authentication</strong> → <strong>Policies</strong> → Enable RLS on the table, then add policies:
-                    <ul>
-                        <li>INSERT: Allow anonymous (for public submissions)</li>
-                        <li>SELECT/UPDATE: Allow authenticated only (for admin)</li>
-                    </ul>
-                </li>
-            </ol>
-            <div class="config-form">
-                <input type="text" id="supabaseUrl" placeholder="Project URL (https://xxx.supabase.co)">
-                <input type="text" id="supabaseKey" placeholder="anon/public key">
-                <button class="btn btn-primary" onclick="saveConfig()">
-                    <i class="fas fa-save"></i> Save Configuration
-                </button>
-            </div>
+        <!-- Login Form -->
+        <div id="loginForm" class="login-form">
+            <h2><i class="fas fa-lock"></i> Admin Login</h2>
+            <input type="password" id="adminKey" placeholder="Admin Key" onkeypress="if(event.key==='Enter')login()">
+            <button onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <p style="margin-top: 16px; color: #888; font-size: 14px;">
+                Default key: <code>tadweer-admin-2025</code>
+            </p>
         </div>
         
-        <!-- Stats Row -->
-        <div class="stats-row" id="statsRow" style="display: none;">
-            <div class="stat-card">
-                <h3>Total Suggestions</h3>
-                <div class="value" id="statTotal">0</div>
+        <!-- Dashboard (hidden until logged in) -->
+        <div id="dashboard" class="hidden">
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h3>Total Suggestions</h3>
+                    <div class="value" id="statTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>New</h3>
+                    <div class="value" id="statNew">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Under Review</h3>
+                    <div class="value" id="statReviewing">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Implemented</h3>
+                    <div class="value" id="statImplemented">0</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>New</h3>
-                <div class="value" id="statNew">0</div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <select id="filterStatus" onchange="filterSuggestions()">
+                    <option value="">All Statuses</option>
+                    <option value="new">New</option>
+                    <option value="reviewing">Under Review</option>
+                    <option value="implemented">Implemented</option>
+                    <option value="declined">Declined</option>
+                </select>
+                <select id="filterCategory" onchange="filterSuggestions()">
+                    <option value="">All Categories</option>
+                    <option value="website">Website</option>
+                    <option value="activity">Activity</option>
+                    <option value="general">General</option>
+                    <option value="partnership">Partnership</option>
+                </select>
+                <input type="text" id="filterSearch" placeholder="Search..." oninput="filterSuggestions()">
             </div>
-            <div class="stat-card">
-                <h3>Under Review</h3>
-                <div class="value" id="statReviewing">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Implemented</h3>
-                <div class="value" id="statImplemented">0</div>
-            </div>
-        </div>
-        
-        <!-- Filters -->
-        <div class="filters" id="filtersRow" style="display: none;">
-            <select id="filterStatus" onchange="filterSuggestions()">
-                <option value="">All Statuses</option>
-                <option value="new">New</option>
-                <option value="reviewing">Under Review</option>
-                <option value="implemented">Implemented</option>
-                <option value="declined">Declined</option>
-            </select>
-            <select id="filterCategory" onchange="filterSuggestions()">
-                <option value="">All Categories</option>
-                <option value="website">Website</option>
-                <option value="activity">Activity</option>
-                <option value="general">General</option>
-                <option value="partnership">Partnership</option>
-            </select>
-            <input type="text" id="filterSearch" placeholder="Search..." oninput="filterSuggestions()">
-        </div>
-        
-        <!-- Suggestions List -->
-        <div class="suggestions-list" id="suggestionsList">
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>Configure Supabase above to view suggestions</p>
+            
+            <!-- Suggestions List -->
+            <div class="suggestions-list" id="suggestionsList">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading suggestions...</p>
+                </div>
             </div>
         </div>
     </main>
     
     <script>
+        const API_URL = '/api/suggestions';
         let allSuggestions = [];
-        let supabaseUrl = localStorage.getItem('supabase_url') || '';
-        let supabaseKey = localStorage.getItem('supabase_key') || '';
+        let adminKey = localStorage.getItem('tadweer_admin_key') || '';
         
-        // Check if configured
-        function checkConfig() {
-            if (supabaseUrl && supabaseKey) {
-                document.getElementById('setupNotice').style.display = 'none';
-                document.getElementById('statsRow').style.display = 'grid';
-                document.getElementById('filtersRow').style.display = 'flex';
+        // Check if already logged in
+        function checkAuth() {
+            if (adminKey) {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
                 loadSuggestions();
-            } else {
-                document.getElementById('supabaseUrl').value = supabaseUrl;
-                document.getElementById('supabaseKey').value = supabaseKey;
             }
         }
         
-        function saveConfig() {
-            supabaseUrl = document.getElementById('supabaseUrl').value.trim();
-            supabaseKey = document.getElementById('supabaseKey').value.trim();
-            
-            if (!supabaseUrl || !supabaseKey) {
-                alert('Please enter both URL and API key');
+        function login() {
+            adminKey = document.getElementById('adminKey').value.trim();
+            if (!adminKey) {
+                alert('Please enter the admin key');
                 return;
             }
-            
-            localStorage.setItem('supabase_url', supabaseUrl);
-            localStorage.setItem('supabase_key', supabaseKey);
-            
-            // Also save to a config that the main site can use
-            localStorage.setItem('tadweer_supabase_config', JSON.stringify({
-                url: supabaseUrl,
-                key: supabaseKey
-            }));
-            
-            checkConfig();
+            localStorage.setItem('tadweer_admin_key', adminKey);
+            checkAuth();
+        }
+        
+        function logout() {
+            adminKey = '';
+            localStorage.removeItem('tadweer_admin_key');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('adminKey').value = '';
         }
         
         async function loadSuggestions() {
-            if (!supabaseUrl || !supabaseKey) return;
-            
             try {
-                const response = await fetch(`${supabaseUrl}/rest/v1/suggestions?order=created_at.desc`, {
+                const response = await fetch(API_URL, {
                     headers: {
-                        'apikey': supabaseKey,
-                        'Authorization': `Bearer ${supabaseKey}`
+                        'Authorization': `Bearer ${adminKey}`
                     }
                 });
+                
+                if (response.status === 401) {
+                    alert('Invalid admin key');
+                    logout();
+                    return;
+                }
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -497,7 +479,7 @@
                 document.getElementById('suggestionsList').innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <p>Failed to load suggestions. Check your configuration.</p>
+                        <p>Failed to load suggestions.</p>
                         <p><small>${error.message}</small></p>
                     </div>
                 `;
@@ -588,15 +570,13 @@
         
         async function updateStatus(id, status) {
             try {
-                const response = await fetch(`${supabaseUrl}/rest/v1/suggestions?id=eq.${id}`, {
+                const response = await fetch(API_URL, {
                     method: 'PATCH',
                     headers: {
-                        'apikey': supabaseKey,
-                        'Authorization': `Bearer ${supabaseKey}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
+                        'Authorization': `Bearer ${adminKey}`,
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ status })
+                    body: JSON.stringify({ id, status })
                 });
                 
                 if (response.ok) {
@@ -617,7 +597,7 @@
         }
         
         // Initialize
-        checkConfig();
+        checkAuth();
     </script>
 </body>
 </html>
