@@ -1,0 +1,107 @@
+name: Kaiten Board Manager
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - list-boards
+          - list-cards
+          - create-card
+          - update-card
+          - move-card
+          - close-card
+      board_id:
+        description: 'Board ID (for list-cards, create-card)'
+        required: false
+        type: string
+      card_id:
+        description: 'Card ID (for update-card, move-card, close-card)'
+        required: false
+        type: string
+      title:
+        description: 'Card title (for create-card, update-card)'
+        required: false
+        type: string
+      description:
+        description: 'Card description (for create-card, update-card)'
+        required: false
+        type: string
+      column_id:
+        description: 'Column/Lane ID (for create-card, move-card)'
+        required: false
+        type: string
+
+jobs:
+  kaiten:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List Boards
+        if: ${{ github.event.inputs.action == 'list-boards' }}
+        run: |
+          echo "📋 Fetching all boards..."
+          response=$(curl -s -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            "https://kaiten.io/api/latest/boards")
+          echo "$response" | jq -r '.[] | "ID: \(.id) | Name: \(.title)"' || echo "$response"
+
+      - name: List Cards on Board
+        if: ${{ github.event.inputs.action == 'list-cards' }}
+        run: |
+          echo "🃏 Fetching cards from board ${{ github.event.inputs.board_id }}..."
+          response=$(curl -s -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            "https://kaiten.io/api/latest/boards/${{ github.event.inputs.board_id }}/cards")
+          echo "$response" | jq -r '.[] | "ID: \(.id) | \(.title) | Column: \(.column_id)"' || echo "$response"
+
+      - name: Create Card
+        if: ${{ github.event.inputs.action == 'create-card' }}
+        run: |
+          echo "➕ Creating card on board ${{ github.event.inputs.board_id }}..."
+          response=$(curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "title": "${{ github.event.inputs.title }}",
+              "description": "${{ github.event.inputs.description }}",
+              "column_id": ${{ github.event.inputs.column_id }}
+            }' \
+            "https://kaiten.io/api/latest/boards/${{ github.event.inputs.board_id }}/cards")
+          echo "$response" | jq '.' || echo "$response"
+
+      - name: Update Card
+        if: ${{ github.event.inputs.action == 'update-card' }}
+        run: |
+          echo "✏️ Updating card ${{ github.event.inputs.card_id }}..."
+          response=$(curl -s -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "title": "${{ github.event.inputs.title }}",
+              "description": "${{ github.event.inputs.description }}"
+            }' \
+            "https://kaiten.io/api/latest/cards/${{ github.event.inputs.card_id }}")
+          echo "$response" | jq '.' || echo "$response"
+
+      - name: Move Card
+        if: ${{ github.event.inputs.action == 'move-card' }}
+        run: |
+          echo "🔄 Moving card ${{ github.event.inputs.card_id }} to column ${{ github.event.inputs.column_id }}..."
+          response=$(curl -s -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"column_id": ${{ github.event.inputs.column_id }}}' \
+            "https://kaiten.io/api/latest/cards/${{ github.event.inputs.card_id }}")
+          echo "$response" | jq '.' || echo "$response"
+
+      - name: Close Card (Archive)
+        if: ${{ github.event.inputs.action == 'close-card' }}
+        run: |
+          echo "✅ Closing card ${{ github.event.inputs.card_id }}..."
+          response=$(curl -s -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.KAITEN_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"archived": true}' \
+            "https://kaiten.io/api/latest/cards/${{ github.event.inputs.card_id }}")
+          echo "$response" | jq '.' || echo "$response"
