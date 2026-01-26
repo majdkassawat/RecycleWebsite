@@ -80,6 +80,7 @@ function highlightNav() {
 
     const slides = Array.from(slider.querySelectorAll(".slide"));
     const dots = Array.from(slider.querySelectorAll(".dot"));
+    const counter = slider.querySelector(".slide-counter");
     const prev = document.getElementById("prevSlide");
     const next = document.getElementById("nextSlide");
     let currentIndex = slides.findIndex((slide) => slide.classList.contains("active"));
@@ -92,6 +93,7 @@ function highlightNav() {
         const newIndex = (index + slides.length) % slides.length;
         slides.forEach((slide, idx) => slide.classList.toggle("active", idx === newIndex));
         dots.forEach((dot, idx) => dot.classList.toggle("active", idx === newIndex));
+        if (counter) counter.textContent = `${newIndex + 1} / ${slides.length}`;
         currentIndex = newIndex;
         resetTimer();
     };
