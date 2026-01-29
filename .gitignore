@@ -8,4 +8,7 @@ images/_whatsapp_export/
 images/WhatsApp*.zip
 tools/email_signature.zip
 
+# Modifications folder (not to be published)
+_modifications/
+
 __pycache__/
